@@ -1,0 +1,14 @@
+{
+  "require": {
+    "ext-pdo": "*",
+    "ext-memcached": "*",
+    "ext-curl": "*",
+    "ext-bcmath": "*",
+    "ccxt/ccxt": "^1.94"
+  },
+  "autoload": {
+    "psr-4": {
+      "Src\\": "src/"
+    }
+  }
+}

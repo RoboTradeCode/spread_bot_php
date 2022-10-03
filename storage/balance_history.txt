@@ -1,0 +1,136 @@
+Balances:
+{
+    "binance": {
+        "ETH": {
+            "free": 0.0093167,
+            "used": 0,
+            "total": 0.0093167
+        },
+        "BTC": {
+            "free": 0.00211666,
+            "used": 0,
+            "total": 0.00211666
+        },
+        "USDT": {
+            "free": 148.09466307,
+            "used": 0,
+            "total": 148.09466307
+        }
+    }
+}
+
+
+Array
+(
+    [binance] => Array
+        (
+            [ETH] => Array
+                (
+                    [free] => 0.0094107
+                    [used] => 0
+                    [total] => 0.0094107
+                )
+
+            [BTC] => Array
+                (
+                    [free] => 0.00212634
+                    [used] => 0
+                    [total] => 0.00212634
+                )
+
+            [USDT] => Array
+                (
+                    [free] => 147.57705943
+                    [used] => 0
+                    [total] => 147.57705943
+                )
+
+        )
+
+)
+
+Balances:
+{
+    "binance": {
+        "ETH": {
+            "free": 0.0094107,
+            "used": 0,
+            "total": 0.0094107
+        },
+        "BTC": {
+            "free": 0.00212634,
+            "used": 0,
+            "total": 0.00212634
+        },
+        "USDT": {
+            "free": 147.57705943,
+            "used": 0,
+            "total": 147.57705943
+        }
+    }
+}
+
+Array
+(
+    [binance] => Array
+        (
+            [ETH] => Array
+                (
+                    [free] => 0.0094057
+                    [used] => 0
+                    [total] => 0.0094057
+                )
+
+            [BTC] => Array
+                (
+                    [free] => 0.00213452
+                    [used] => 0
+                    [total] => 0.00213452
+                )
+
+            [USDT] => Array
+                (
+                    [free] => 147.30748695
+                    [used] => 0
+                    [total] => 147.30748695
+                )
+
+        )
+
+)
+
+
+#	Triangle	Step 1	Step 2	Step 3	Result
+0	USDT -> ETH -> BTC
+Deal: 10.31475000 USDT
+Max: 200
+
+Market: ETH -> USDT (buy)
+Position: 1
+Sell: 0 (0)
+Buy: 2022.5 (0.0051)
+Result: -10.31475 USDT, +0.00510000 ETH
+binance
+
+Market: ETH -> BTC (sell)
+Position: 1
+Sell: 0.067704 (6.2682)
+Buy: 0 (0)
+Result: -0.00510000 ETH, +0.00034529 BTC
+binance
+
+Market: BTC -> USDT (sell)
+Position: 1
+Sell: 29874.66 (0.89767)
+Buy: 0 (0)
+Result: -0.00034529 BTC, +10.31543330 USDT
+binance
+0.00068330 USDT
+Best Result
+
+
+−0,000005 ETH * 2022.5 = -0.0101125 USDT
+0,00000818 BTC * 29874.66 = +0.2443747188 USDT
+−0,26957248 USDT
+
+profit = 0.2443747188 - 0.0101125 − 0,26957248 = −0,0353102612 USDT
