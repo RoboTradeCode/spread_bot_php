@@ -41,9 +41,9 @@ $multi_core = new MemcachedData($exchange, $market_discovery_exchange, $markets,
 
 $spread_bot = new SpreadBot($exchange, $market_discovery_exchange);
 
-$bot = new Ccxt($exchange, $keys['api_key'][0], $keys['secret_key'][0]);
-$bot_only_for_balances = new Ccxt($exchange, $keys['api_key'][1], $keys['secret_key'][1]);
-$bot_only_for_get_open_orders = new Ccxt($exchange, $keys['api_key'][2], $keys['secret_key'][2]);
+$bot = new Ccxt($exchange, $keys[0]['api_key'], $keys[0]['secret_key']);
+$bot_only_for_balances = new Ccxt($exchange, $keys[1]['api_key'], $keys[1]['secret_key']);
+$bot_only_for_get_open_orders = new Ccxt($exchange, $keys[2]['api_key'], $keys[2]['secret_key']);
 
 $balances = $bot->cancelAllOrdersAndGetBalance($assets);
 
