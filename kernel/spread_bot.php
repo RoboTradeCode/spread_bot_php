@@ -150,8 +150,8 @@ while (true) {
                 $count_real_orders_for_symbol_sell = count($real_orders_for_symbol['sell']);
 
                 if (
-                    (($count_real_orders_for_symbol_sell > 0) && ($count_real_orders_for_symbol_sell >= $must_orders[$symbol]['sell'])) ||
-                    ($balances[$base_asset]['free'] <= $max_deal_amounts[$base_asset])
+                    ($count_real_orders_for_symbol_sell > 0) &&
+                    (($count_real_orders_for_symbol_sell >= $must_orders[$symbol]['sell']) || ($balances[$base_asset]['free'] <= $max_deal_amounts[$base_asset]))
                 ) {
                     $cancel_the_farthest_sell_order = $spread_bot->cancelTheFarthestSellOrder($real_orders_for_symbol['sell']);
 
@@ -187,8 +187,8 @@ while (true) {
                 $count_real_orders_for_symbol_buy = count($real_orders_for_symbol['buy']);
 
                 if (
-                    (($count_real_orders_for_symbol_buy > 0) && ($count_real_orders_for_symbol_buy >= $must_orders[$symbol]['buy'])) ||
-                    ($balances[$quote_asset]['free'] <= $max_deal_amounts[$quote_asset])
+                    ($count_real_orders_for_symbol_buy > 0) &&
+                    (($count_real_orders_for_symbol_buy >= $must_orders[$symbol]['buy']) || ($balances[$quote_asset]['free'] <= $max_deal_amounts[$quote_asset]))
                 ) {
                     $cancel_the_farthest_buy_order = $spread_bot->cancelTheFarthestBuyOrder($real_orders_for_symbol['buy']);
 
