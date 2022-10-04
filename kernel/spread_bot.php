@@ -41,7 +41,9 @@ $multi_core = new MemcachedData($exchange, $market_discovery_exchange, $markets,
 
 $spread_bot = new SpreadBot($exchange, $market_discovery_exchange);
 
-$bot = new Ccxt($exchange, $keys['api_key'], $keys['secret_key']);
+$bot = new Ccxt($exchange, $keys['api_key'][0], $keys['secret_key'][0]);
+$bot_only_for_balances = new Ccxt($exchange, $keys['api_key'][1], $keys['secret_key'][1]);
+$bot_only_for_get_open_orders = new Ccxt($exchange, $keys['api_key'][2], $keys['secret_key'][2]);
 
 $balances = $bot->cancelAllOrdersAndGetBalance($assets);
 
@@ -117,7 +119,7 @@ while (true) {
                         'status' => $create_order['status'],
                     ];
 
-                    $balances = $bot->getBalances($assets);
+                    $balances = $bot_only_for_balances->getBalances($assets);
 
                     Debug::printAll($debug_data, $balances, $real_orders, $exchange);
                     Debug::echo('[INFO] Create: ' . $symbol . ', ' . $create_order['side'] . ', ' . $create_order['amount'] . ', ' . $create_order['price']);
@@ -146,7 +148,7 @@ while (true) {
                         'status' => $create_order['status'],
                     ];
 
-                    $balances = $bot->getBalances($assets);
+                    $balances = $bot_only_for_balances->getBalances($assets);
 
                     Debug::printAll($debug_data, $balances, $real_orders_for_symbol['sell'], $exchange);
                     Debug::echo('[INFO] Create: ' . $symbol . ', ' . $create_order['side'] . ', ' . $create_order['amount'] . ', ' . $create_order['price']);
@@ -161,7 +163,7 @@ while (true) {
                         $bot->cancelOrder($cancel_the_farthest_sell_order['id'], $cancel_the_farthest_sell_order['symbol']);
                         unset($real_orders[$cancel_the_farthest_sell_order['id']]);
 
-                        $balances = $bot->getBalances($assets);
+                        $balances = $bot_only_for_balances->getBalances($assets);
 
                         Debug::printAll($debug_data, $balances, $real_orders_for_symbol['sell'], $exchange);
                         Debug::echo('[INFO] Cancel: ' . $cancel_the_farthest_sell_order['id'] . ', ' . $cancel_the_farthest_sell_order['symbol'] . ', ' . $cancel_the_farthest_sell_order['side'] . ', ' . $cancel_the_farthest_sell_order['amount'] . ', ' . $cancel_the_farthest_sell_order['price']);
@@ -184,7 +186,7 @@ while (true) {
                     }
 
                 if ($need_get_balance)
-                    $balances = $bot->getBalances($assets);
+                    $balances = $bot_only_for_balances->getBalances($assets);
 
                 $count_real_orders_for_symbol_buy = count($real_orders_for_symbol['buy']);
 
@@ -195,7 +197,7 @@ while (true) {
                         $bot->cancelOrder($cancel_the_farthest_buy_order['id'], $cancel_the_farthest_buy_order['symbol']);
                         unset($real_orders[$cancel_the_farthest_buy_order['id']]);
 
-                        $balances = $bot->getBalances($assets);
+                        $balances = $bot_only_for_balances->getBalances($assets);
 
                         Debug::printAll($debug_data, $balances, $real_orders_for_symbol['sell'], $exchange);
                         Debug::echo('[INFO] Cancel: ' . $cancel_the_farthest_buy_order['id'] . ', ' . $cancel_the_farthest_buy_order['symbol'] . ', ' . $cancel_the_farthest_buy_order['side'] . ', ' . $cancel_the_farthest_buy_order['amount'] . ', ' . $cancel_the_farthest_buy_order['price']);
@@ -218,7 +220,7 @@ while (true) {
                     }
 
                 if ($need_get_balance)
-                    $balances = $bot->getBalances($assets);
+                    $balances = $bot_only_for_balances->getBalances($assets);
             } elseif (TimeV2::up(1, 'empty_orderbooks' . $symbol)) {
                 if (empty($orderbooks[$symbol][$exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$exchange]');
                 if (empty($orderbooks[$symbol][$market_discovery_exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$market_discovery_exchange]');
@@ -227,6 +229,22 @@ while (true) {
     } elseif (TimeV2::up(1, 'empty_data')) Debug::echo('[WARNING] Empty $balances');
 
     if (TimeV2::up(5, 'balance'))
-        $balances = $bot->getBalances($assets);
+        $balances = $bot_only_for_balances->getBalances($assets);
 
+    if (TimeV2::up(5, 'get_open_orders')) {
+        $or = $bot_only_for_balances->getOpenOrders();
+
+        $real_orders = [];
+
+        foreach ($or as $item) {
+            $real_orders[$item['id']] = [
+                'id' => $item['id'],
+                'symbol' => $item['symbol'],
+                'side' => $item['side'],
+                'amount' => $item['amount'],
+                'price' => $item['price'],
+                'status' => $item['status'],
+            ];
+        }
+    }
 }
