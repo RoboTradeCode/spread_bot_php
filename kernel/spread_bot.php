@@ -95,27 +95,33 @@ while (true) {
                         $max_deal_amounts, $real_orders_for_symbol, $must_orders[$symbol]
                     )
                 ) {
-                    $create_order = $bot->createOrder(
-                        $symbol,
-                        'limit',
-                        'buy',
-                        $max_deal_amounts[$base_asset],
-                        $spread_bot->incrementNumber($exchange_orderbook['bid'] + 2 * $market['price_increment'], $market['price_increment'])
-                    );
+                    $side = 'buy';
+                    $amount = $max_deal_amounts[$base_asset];
+                    $price = $spread_bot->incrementNumber($exchange_orderbook['bid'] + 2 * $market['price_increment'], $market['price_increment']);
 
-                    $real_orders[$create_order['id']] = [
-                        'id' => $create_order['id'],
-                        'symbol' => $create_order['symbol'],
-                        'side' => $create_order['side'],
-                        'amount' => $create_order['amount'],
-                        'price' => $create_order['price'],
-                        'status' => $create_order['status'],
-                    ];
+                    if (
+                        $create_order = $bot->createOrder(
+                            $symbol,
+                            'limit',
+                            $side,
+                            $amount,
+                            $price
+                        )
+                    ) {
+                        $real_orders[$create_order['id']] = [
+                            'id' => $create_order['id'],
+                            'symbol' => $create_order['symbol'],
+                            'side' => $create_order['side'],
+                            'amount' => $create_order['amount'],
+                            'price' => $create_order['price'],
+                            'status' => $create_order['status'],
+                        ];
+                    }
 
                     $balances = $bot_only_for_balances->getBalances($assets);
 
                     Debug::printAll($debug_data, $balances, $real_orders, $exchange);
-                    Debug::echo('[INFO] Create: ' . $symbol . ', ' . $create_order['side'] . ', ' . $create_order['amount'] . ', ' . $create_order['price']);
+                    Debug::echo('[INFO] Create: ' . $symbol . ', ' . $side . ', ' . $amount . ', ' . $price);
                 }
 
                 if (
@@ -124,27 +130,33 @@ while (true) {
                         $max_deal_amounts, $real_orders_for_symbol, $must_orders[$symbol]
                     )
                 ) {
-                    $create_order = $bot->createOrder(
-                        $symbol,
-                        'limit',
-                        'sell',
-                        $max_deal_amounts[$base_asset],
-                        $spread_bot->incrementNumber($exchange_orderbook['ask'] - $market['price_increment'], $market['price_increment'])
-                    );
+                    $side = 'sell';
+                    $amount = $max_deal_amounts[$base_asset];
+                    $price = $spread_bot->incrementNumber($exchange_orderbook['ask'] - $market['price_increment'], $market['price_increment']);
 
-                    $real_orders[$create_order['id']] = [
-                        'id' => $create_order['id'],
-                        'symbol' => $create_order['symbol'],
-                        'side' => $create_order['side'],
-                        'amount' => $create_order['amount'],
-                        'price' => $create_order['price'],
-                        'status' => $create_order['status'],
-                    ];
+                    if (
+                        $create_order = $bot->createOrder(
+                            $symbol,
+                            'limit',
+                            $side,
+                            $amount,
+                            $price
+                        )
+                    ) {
+                        $real_orders[$create_order['id']] = [
+                            'id' => $create_order['id'],
+                            'symbol' => $create_order['symbol'],
+                            'side' => $create_order['side'],
+                            'amount' => $create_order['amount'],
+                            'price' => $create_order['price'],
+                            'status' => $create_order['status'],
+                        ];
+                    }
 
                     $balances = $bot_only_for_balances->getBalances($assets);
 
                     Debug::printAll($debug_data, $balances, $real_orders_for_symbol['sell'], $exchange);
-                    Debug::echo('[INFO] Create: ' . $symbol . ', ' . $create_order['side'] . ', ' . $create_order['amount'] . ', ' . $create_order['price']);
+                    Debug::echo('[INFO] Create: ' . $symbol . ', ' . $side . ', ' . $amount . ', ' . $price);
                 }
 
                 $count_real_orders_for_symbol_sell = count($real_orders_for_symbol['sell']);
