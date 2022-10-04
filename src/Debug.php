@@ -19,9 +19,11 @@ class Debug
     public static function printAll(array $array, array $balances, array $orders, string $exchange): void
     {
         if (self::$on) {
+            echo PHP_EOL;
             self::printBalances($balances);
             self::printOrders($orders, $exchange);
             self::simplePrint($array, 'ALGO INFO');
+            echo PHP_EOL;
         }
     }
 
@@ -39,7 +41,7 @@ class Debug
         if (self::$on) {
             echo 'Orders: ' . $exchange . ' [START]----------------------------------------------------------------------------------' . PHP_EOL;
             foreach ($orders as $order)
-                echo '[' . date('Y-m-d H:i:s') . '] ' . $order['client_order_id'] . ', ' . $order['symbol'] . ', ' . $order['side'] . ', ' . ($order['amount'] ?? 'null') . ', ' . $order['price'] . ', ' . $order['status'] . PHP_EOL;
+                echo '[' . date('Y-m-d H:i:s') . '] ' . $order['id'] . ', ' . $order['symbol'] . ', ' . $order['side'] . ', ' . ($order['amount'] ?? 'null') . ', ' . $order['price'] . ', ' . $order['status'] . PHP_EOL;
             echo 'Orders: ' . $exchange . ' [END]------------------------------------------------------------------------------------' . PHP_EOL;
         }
     }

@@ -36,8 +36,8 @@ class SpreadBot
     public function filterOrdersBySideAndSymbol(array $real_orders, string $symbol): array
     {
         return [
-            'buy' => isset($real_orders[$this->exchange]) ? array_filter($real_orders[$this->exchange], fn($real_order_for_symbol) => ($real_order_for_symbol['symbol'] == $symbol) && ($real_order_for_symbol['side'] == 'buy')) : [],
-            'sell' => isset($real_orders[$this->exchange]) ? array_filter($real_orders[$this->exchange], fn($real_order_for_symbol) => ($real_order_for_symbol['symbol'] == $symbol) && ($real_order_for_symbol['side'] == 'sell')) : []
+            'buy' => array_filter($real_orders, fn($real_order_for_symbol) => ($real_order_for_symbol['symbol'] == $symbol) && ($real_order_for_symbol['side'] == 'buy')),
+            'sell' => array_filter($real_orders, fn($real_order_for_symbol) => ($real_order_for_symbol['symbol'] == $symbol) && ($real_order_for_symbol['side'] == 'sell'))
         ];
     }
 
@@ -119,6 +119,6 @@ class SpreadBot
 
     public function getMarket(array $markets, string $symbol)
     {
-        return $markets[$this->exchange][array_search($symbol, array_column($markets, 'common_symbol'))] ?? [];
+        return $markets[array_search($symbol, array_column($markets, 'common_symbol'))] ?? [];
     }
 }

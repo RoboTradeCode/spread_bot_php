@@ -112,13 +112,15 @@ while (true) {
                         'id' => $create_order['id'],
                         'symbol' => $create_order['symbol'],
                         'side' => $create_order['side'],
+                        'amount' => $create_order['amount'],
                         'price' => $create_order['price'],
                         'status' => $create_order['status'],
                     ];
 
                     $balances = $bot->getBalances($assets);
 
-                    Debug::printAll($debug_data, $balances, $real_orders_for_symbol['buy'], $exchange);
+                    Debug::printAll($debug_data, $balances, $real_orders, $exchange);
+                    Debug::echo('[INFO] Create: ' . $symbol . ', ' . $create_order['side'] . ', ' . $create_order['amount'] . ', ' . $create_order['price']);
                 }
 
                 if (
@@ -139,6 +141,7 @@ while (true) {
                         'id' => $create_order['id'],
                         'symbol' => $create_order['symbol'],
                         'side' => $create_order['side'],
+                        'amount' => $create_order['amount'],
                         'price' => $create_order['price'],
                         'status' => $create_order['status'],
                     ];
@@ -146,6 +149,7 @@ while (true) {
                     $balances = $bot->getBalances($assets);
 
                     Debug::printAll($debug_data, $balances, $real_orders_for_symbol['sell'], $exchange);
+                    Debug::echo('[INFO] Create: ' . $symbol . ', ' . $create_order['side'] . ', ' . $create_order['amount'] . ', ' . $create_order['price']);
                 }
 
                 $count_real_orders_for_symbol_sell = count($real_orders_for_symbol['sell']);
@@ -154,13 +158,13 @@ while (true) {
                     $cancel_the_farthest_sell_order = $spread_bot->cancelTheFarthestSellOrder($real_orders_for_symbol['sell']);
 
                     if (TimeV2::up(5, $cancel_the_farthest_sell_order['id'], true)) {
-
                         $bot->cancelOrder($cancel_the_farthest_sell_order['id'], $cancel_the_farthest_sell_order['symbol']);
                         unset($real_orders[$cancel_the_farthest_sell_order['id']]);
 
                         $balances = $bot->getBalances($assets);
 
                         Debug::printAll($debug_data, $balances, $real_orders_for_symbol['sell'], $exchange);
+                        Debug::echo('[INFO] Cancel: ' . $cancel_the_farthest_sell_order['id'] . ', ' . $cancel_the_farthest_sell_order['symbol'] . ', ' . $cancel_the_farthest_sell_order['side'] . ', ' . $cancel_the_farthest_sell_order['amount'] . ', ' . $cancel_the_farthest_sell_order['price']);
                     }
                 }
 
@@ -176,6 +180,7 @@ while (true) {
 
                         $need_get_balance = true;
                         Debug::printAll($debug_data, $balances, $real_orders_for_symbol['sell'], $exchange);
+                        Debug::echo('[INFO] Cancel: ' . $real_orders_for_symbol_sell['id'] . ', ' . $real_orders_for_symbol_sell['symbol'] . ', ' . $real_orders_for_symbol_sell['side'] . ', ' . $real_orders_for_symbol_sell['amount'] . ', ' . $real_orders_for_symbol_sell['price']);
                     }
 
                 if ($need_get_balance)
@@ -193,6 +198,7 @@ while (true) {
                         $balances = $bot->getBalances($assets);
 
                         Debug::printAll($debug_data, $balances, $real_orders_for_symbol['sell'], $exchange);
+                        Debug::echo('[INFO] Cancel: ' . $cancel_the_farthest_buy_order['id'] . ', ' . $cancel_the_farthest_buy_order['symbol'] . ', ' . $cancel_the_farthest_buy_order['side'] . ', ' . $cancel_the_farthest_buy_order['amount'] . ', ' . $cancel_the_farthest_buy_order['price']);
                     }
                 }
 
@@ -208,6 +214,7 @@ while (true) {
 
                         $need_get_balance = true;
                         Debug::printAll($debug_data, $balances, $real_orders_for_symbol['buy'], $exchange);
+                        Debug::echo('[INFO] Cancel: ' . $real_orders_for_symbol_buy['id'] . ', ' . $real_orders_for_symbol_buy['symbol'] . ', ' . $real_orders_for_symbol_buy['side'] . ', ' . $real_orders_for_symbol_buy['amount'] . ', ' . $real_orders_for_symbol_buy['price']);
                     }
 
                 if ($need_get_balance)
