@@ -239,7 +239,7 @@ while (true) {
                 }
             }
         } elseif (TimeV2::up(1, 'empty_data')) Debug::echo('[WARNING] Empty $balances');
-    }
+    } elseif (TimeV2::up(1, 'no_rates')) Debug::echo('[WARNING] No rates');
 
     if (TimeV2::up(5, 'balance'))
         $balances = $bot_only_for_balances->getBalances($assets);
