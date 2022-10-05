@@ -54,8 +54,11 @@ while (true) {
     $orderbooks = $all_data['orderbooks'];
 
     if (!empty($orderbooks['BTC/USDT'][$market_discovery_exchange])) {
-        $max_deal_amounts['BTC'] = ($orderbooks['BTC/USDT'][$market_discovery_exchange]['bids'][0][0] +$orderbooks['BTC/USDT'][$market_discovery_exchange]['asks'][0][0]) / 2;
-        $max_deal_amounts['USDT'] = 1;
+        $rates = [
+            'BTC' => ($orderbooks['BTC/USDT'][$market_discovery_exchange]['bids'][0][0] +$orderbooks['BTC/USDT'][$market_discovery_exchange]['asks'][0][0]) / 2,
+            'USDT' => 1
+        ];
+        $max_deal_amounts = Filter::getDealAmountByRate($rates, $max_deal_amount);
 
         if ($balances) {
             $must_orders = LimitationBalance::get($balances, $assets, $common_symbols, $max_deal_amounts, $amount_limitations);
