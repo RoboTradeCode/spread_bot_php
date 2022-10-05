@@ -52,7 +52,7 @@ class SpreadBot
     ): bool
     {
         return ($exchange_orderbook['bid'] <= $profit['bid']) && ($balances[$quote_asset]['free'] >= $max_deal_amounts[$quote_asset]) &&
-            (count($real_orders_for_symbol['buy']) < $must_orders['buy']) && TimeV2::up(1, 'create_order', true);
+            (count($real_orders_for_symbol['buy']) < $must_orders['buy']) && TimeV2::up(1, 'create_order_buy', true);
     }
 
     public function isCreateSellOrder(
@@ -66,7 +66,7 @@ class SpreadBot
     ): bool
     {
         return ($exchange_orderbook['ask'] >= $profit['ask']) && ($balances[$base_asset]['free'] >= $max_deal_amounts[$base_asset]) &&
-            (count($real_orders_for_symbol['sell']) < $must_orders['sell']) && TimeV2::up(1, 'create_order', true);
+            (count($real_orders_for_symbol['sell']) < $must_orders['sell']) && TimeV2::up(1, 'create_order_sell', true);
     }
 
     public function cancelTheFarthestSellOrder(array $orders)
