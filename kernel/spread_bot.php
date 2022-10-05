@@ -32,6 +32,16 @@ $markets = $config['markets'][$exchange];
 $assets = $config['assets'][$exchange];
 $common_symbols = array_column($markets, 'common_symbol');
 
+$memcached->set(
+    'spread_bot_config',
+    [
+        'usleep' => $sleep,
+        'deal_amount' => $max_deal_amount,
+        'min_profit_bid' => $min_profit['bid'],
+        'min_profit_ask' => $min_profit['ask']
+    ]
+);
+
 Debug::switchOn($debug);
 
 $multi_core = new MemcachedData($exchange, $market_discovery_exchange, $markets, $expired_orderbook_time);
@@ -100,8 +110,8 @@ while (true) {
                         )
                     ) {
                         $side = 'buy';
-                        $amount = $max_deal_amounts[$base_asset];
-                        $price = $spread_bot->incrementNumber($exchange_orderbook['bid'] + 2 * $market['price_increment'], $market['price_increment']);
+                        $amount = $spread_bot->incrementNumber($max_deal_amounts[$base_asset], $market['amount_increment']);
+                        $price = $spread_bot->incrementNumber($exchange_orderbook['bid'], $market['price_increment']);
 
                         if (
                             $create_order = $bot->createOrder(
@@ -135,8 +145,8 @@ while (true) {
                         )
                     ) {
                         $side = 'sell';
-                        $amount = $max_deal_amounts[$base_asset];
-                        $price = $spread_bot->incrementNumber($exchange_orderbook['ask'] - $market['price_increment'], $market['price_increment']);
+                        $amount = $spread_bot->incrementNumber($max_deal_amounts[$base_asset], $market['amount_increment']);
+                        $price = $spread_bot->incrementNumber($exchange_orderbook['ask'], $market['price_increment']);
 
                         if (
                             $create_order = $bot->createOrder(
