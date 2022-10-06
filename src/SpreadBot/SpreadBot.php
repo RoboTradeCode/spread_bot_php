@@ -16,6 +16,20 @@ class SpreadBot
         $this->market_discovery_exchange = $market_discovery_exchange;
     }
 
+    public function getMinProfit(array $balances, array $min_profits): array
+    {
+        $K_btc = round($balances['BTC']['total'] / ($balances['BTC']['total'] + $balances['USDT']['total']), 4);
+
+        foreach ($min_profits as $K_btc_value => $profit_bid_and_ask)
+            if ($K_btc_value > $K_btc)
+                return [
+                    'bid' => $profit_bid_and_ask['profit_bid'],
+                    'ask' => $profit_bid_and_ask['profit_ask']
+                ];
+
+        return [];
+    }
+
     public function getBestOrderbook(array $orderbooks, string $symbol, bool $is_exchange = true): array
     {
         $exchange = $is_exchange ? $this->exchange : $this->market_discovery_exchange;

@@ -24,7 +24,7 @@ $expired_orderbook_time = $config['expired_orderbook_time'];
 $debug = $config['debug'];
 $sleep = $config['sleep'];
 $max_deal_amount = $config['max_deal_amount'];
-$min_profit = $config['min_profit'];
+$min_profits = $config['min_profits'];
 $amount_limitations = $config['amount_limitations'];
 $fees = $config['fees'];
 $keys = $config['keys'][$exchange];
@@ -37,8 +37,7 @@ $memcached->set(
     [
         'usleep' => $sleep,
         'deal_amount' => $max_deal_amount,
-        'min_profit_bid' => $min_profit['bid'],
-        'min_profit_ask' => $min_profit['ask']
+        'min_profit' => $min_profits
     ]
 );
 
@@ -73,6 +72,8 @@ while (true) {
         if ($balances) {
             $must_orders = LimitationBalance::get($balances, $assets, $common_symbols, $max_deal_amounts, $amount_limitations);
 
+            $min_profit = $spread_bot->getMinProfit($balances, $min_profits);
+
             foreach ($common_symbols as $symbol) {
                 if (!empty($orderbooks[$symbol][$exchange]) && !empty($orderbooks[$symbol][$market_discovery_exchange])) {
                     $market = $spread_bot->getMarket($markets, $symbol);
@@ -95,6 +96,8 @@ while (true) {
                         'market_discovery_ask' => $market_discovery['ask'],
                         'profit_bid' => $profit['bid'],
                         'profit_ask' => $profit['ask'],
+                        'min_profit_bid' => $min_profit['bid'],
+                        'min_profit_ask' => $min_profit['ask'],
                         'real_orders_for_symbol_sell' => count($real_orders_for_symbol['sell']),
                         'real_orders_for_symbol_buy' => count($real_orders_for_symbol['buy']),
                     ];
