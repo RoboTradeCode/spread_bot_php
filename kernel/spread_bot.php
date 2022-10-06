@@ -72,7 +72,7 @@ while (true) {
         if ($balances) {
             $must_orders = LimitationBalance::get($balances, $assets, $common_symbols, $max_deal_amounts, $amount_limitations);
 
-            $min_profit = $spread_bot->getMinProfit($balances, $min_profits);
+            $min_profit = $spread_bot->getMinProfit($balances, $min_profits, $rates);
 
             foreach ($common_symbols as $symbol) {
                 if (!empty($orderbooks[$symbol][$exchange]) && !empty($orderbooks[$symbol][$market_discovery_exchange])) {
@@ -96,6 +96,7 @@ while (true) {
                         'market_discovery_ask' => $market_discovery['ask'],
                         'profit_bid' => $profit['bid'],
                         'profit_ask' => $profit['ask'],
+                        'K_btc' => round($balances['BTC']['total'] * $rates['BTC'] / ($balances['BTC']['total'] * $rates['BTC'] + $balances['USDT']['total']), 4),
                         'min_profit_bid' => $min_profit['bid'],
                         'min_profit_ask' => $min_profit['ask'],
                         'real_orders_for_symbol_sell' => count($real_orders_for_symbol['sell']),
