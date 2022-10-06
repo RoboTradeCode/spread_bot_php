@@ -2,6 +2,7 @@
 
 namespace Src\SpreadBot;
 
+use Src\FloatRound;
 use Src\TimeV2;
 
 class SpreadBot
@@ -48,9 +49,14 @@ class SpreadBot
         string $quote_asset,
         array $max_deal_amounts,
         array $real_orders_for_symbol,
-        array $must_orders
+        array $must_orders,
+        float $price
     ): bool
     {
+        foreach ($real_orders_for_symbol['buy'] as $real_order_for_symbol)
+            if (FloatRound::compare($real_order_for_symbol['price'], $price))
+                return false;
+
         return ($exchange_orderbook['bid'] <= $profit['bid']) && ($balances[$quote_asset]['free'] >= $max_deal_amounts[$quote_asset]) &&
             (count($real_orders_for_symbol['buy']) < $must_orders['buy']) && TimeV2::up(1, 'create_order_buy', true);
     }
@@ -62,9 +68,14 @@ class SpreadBot
         string $base_asset,
         array $max_deal_amounts,
         array $real_orders_for_symbol,
-        array $must_orders
+        array $must_orders,
+        float $price
     ): bool
     {
+        foreach ($real_orders_for_symbol['sell'] as $real_order_for_symbol)
+            if (FloatRound::compare($real_order_for_symbol['price'], $price))
+                return false;
+
         return ($exchange_orderbook['ask'] >= $profit['ask']) && ($balances[$base_asset]['free'] >= $max_deal_amounts[$base_asset]) &&
             (count($real_orders_for_symbol['sell']) < $must_orders['sell']) && TimeV2::up(1, 'create_order_sell', true);
     }

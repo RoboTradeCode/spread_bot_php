@@ -103,15 +103,16 @@ while (true) {
                         $debug_data['must_order_' . $as . '_buy'] = $must_order['buy'];
                     }
 
+                    $price = $spread_bot->incrementNumber($exchange_orderbook['bid'], $market['price_increment']);
+
                     if (
                         $spread_bot->isCreateBuyOrder(
                             $exchange_orderbook, $profit, $balances, $quote_asset,
-                            $max_deal_amounts, $real_orders_for_symbol, $must_orders[$symbol]
+                            $max_deal_amounts, $real_orders_for_symbol, $must_orders[$symbol], $price
                         )
                     ) {
                         $side = 'buy';
                         $amount = $spread_bot->incrementNumber($max_deal_amounts[$base_asset], $market['amount_increment']);
-                        $price = $spread_bot->incrementNumber($exchange_orderbook['bid'], $market['price_increment']);
 
                         if (
                             $create_order = $bot->createOrder(
@@ -138,15 +139,16 @@ while (true) {
                         Debug::echo('[INFO] Create: ' . $symbol . ', ' . $side . ', ' . $amount . ', ' . $price);
                     }
 
+                    $price = $spread_bot->incrementNumber($exchange_orderbook['ask'], $market['price_increment']);
+
                     if (
                         $spread_bot->isCreateSellOrder(
                             $exchange_orderbook, $profit, $balances, $base_asset,
-                            $max_deal_amounts, $real_orders_for_symbol, $must_orders[$symbol]
+                            $max_deal_amounts, $real_orders_for_symbol, $must_orders[$symbol], $price
                         )
                     ) {
                         $side = 'sell';
                         $amount = $spread_bot->incrementNumber($max_deal_amounts[$base_asset], $market['amount_increment']);
-                        $price = $spread_bot->incrementNumber($exchange_orderbook['ask'], $market['price_increment']);
 
                         if (
                             $create_order = $bot->createOrder(
