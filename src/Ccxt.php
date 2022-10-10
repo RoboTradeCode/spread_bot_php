@@ -2,12 +2,13 @@
 
 namespace Src;
 
+use ccxt\Exchange;
 use Exception;
 use Throwable;
 
 class Ccxt
 {
-    private mixed $exchange;
+    private Exchange $exchange;
 
     public function __construct($exchange_name, $api_public = '', $api_secret = '', $api_password = '', $api_uid = '', $enableRateLimit = false)
     {
@@ -23,6 +24,21 @@ class Ccxt
         ]);
     }
 
+    public function getMyTrades(int $period = 86400000, array $symbols = ['BTC/USDT'], int $limit = 50): array
+    {
+        $since = $this->exchange->milliseconds() - $period;
+
+        if ($this->exchange->has["fetchOpenOrders"] !== false) {
+            try {
+                return $this->exchange->fetchMyTrades($symbols, $since, $limit);
+            } catch (Throwable $e) {
+                echo "[INFO] getMyTrade does not work. Error: " . $e->getMessage() . PHP_EOL;
+            }
+        }
+
+        return [];
+    }
+    
     public function getOpenOrders(): array
     {
         if ($this->exchange->has["fetchOpenOrders"] !== false) {

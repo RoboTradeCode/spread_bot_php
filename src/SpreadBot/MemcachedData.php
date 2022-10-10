@@ -38,22 +38,26 @@ class MemcachedData
 
         foreach ($memcached_data as $key => $data)
             if (isset($data)) {
-                $parts = explode('_', $key);
+                if ($key == 'rates') {
+                    $rates = $data;
+                } else {
+                    $parts = explode('_', $key);
 
-                $exchange = $parts[0];
-                $action = $parts[1];
-                $value = $parts[2] ?? null;
+                    $exchange = $parts[0];
+                    $action = $parts[1];
+                    $value = $parts[2] ?? null;
 
-                if ($action == 'balances') {
-                    $balances[$exchange] = $data;
-                } elseif ($action == 'orderbook' && $value) {
-                    if (($microtime - $data['core_timestamp']) <= $this->expired_orderbook_time / 1000000) {
-                        $orderbooks[$value][$exchange] = $data;
-                    }
-                } elseif ($action == 'orders') {
-                    if ($exchange == $this->main_exchange) $orders[$exchange] = $data;
-                } else
-                    $undefined[$key] = $data;
+                    if ($action == 'balances') {
+                        $balances[$exchange] = $data;
+                    } elseif ($action == 'orderbook' && $value) {
+                        if (($microtime - $data['core_timestamp']) <= $this->expired_orderbook_time / 1000000) {
+                            $orderbooks[$value][$exchange] = $data;
+                        }
+                    } elseif ($action == 'orders') {
+                        if ($exchange == $this->main_exchange) $orders[$exchange] = $data;
+                    } else
+                        $undefined[$key] = $data;
+                }
             }
 
         return [
@@ -61,6 +65,7 @@ class MemcachedData
             'orderbooks' => $orderbooks ?? [],
             'orders' => $orders ?? [],
             'undefined' => $undefined ?? [],
+            'rates' => $rates ?? []
         ];
     }
 
@@ -84,8 +89,9 @@ class MemcachedData
                 $this->market_discovery_exchange . '_orderbook_',
                 $common_symbols
             ),
-            [$this->main_exchange . '_balances'], // добавить еще к массиву ключ баланса
-            [$this->main_exchange . '_orders']
+            [$this->main_exchange . '_balances'],
+            [$this->main_exchange . '_orders'],
+            ['rates']
         );
     }
 

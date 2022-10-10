@@ -16,10 +16,10 @@ class SpreadBot
         $this->market_discovery_exchange = $market_discovery_exchange;
     }
 
-    public function getMinProfit(array $balances, array $min_profits, array $rates): array
+    public function getMinProfit(array $balances, array $min_profits, array $rates, string $base_asset_main_market, string $quote_asset_main_market): array
     {
-        $btc_in_usdt = $balances['BTC']['total'] * $rates['BTC'];
-        $K_btc = round($btc_in_usdt / ($btc_in_usdt + $balances['USDT']['total']), 4);
+        $btc_in_usdt = $balances[$base_asset_main_market]['total'] * $rates[$base_asset_main_market];
+        $K_btc = round($btc_in_usdt / ($btc_in_usdt + $balances[$quote_asset_main_market]['total']), 4);
 
         foreach ($min_profits as $K_btc_value => $profit_bid_and_ask)
             if ($K_btc_value > $K_btc)

@@ -31,6 +31,8 @@ $keys = $config['keys'][$exchange];
 $markets = $config['markets'][$exchange];
 $assets = $config['assets'][$exchange];
 $common_symbols = array_column($markets, 'common_symbol');
+$main_market = $common_symbols[0];
+list($base_asset_main_market, $quote_asset_main_market) = explode('/', $main_market);
 
 $memcached->set(
     'spread_bot_config',
@@ -60,19 +62,22 @@ while (true) {
 
     $all_data = $multi_core->reformatAndSeparateData($memcached->getMulti($multi_core->keys));
 
-    $orderbooks = $all_data['orderbooks'];
+    [$orderbooks, $rates] = [$all_data['orderbooks'], $all_data['rates']];
 
-    if (!empty($orderbooks['BTC/USDT'][$market_discovery_exchange])) {
+    if (
+        !empty($rates[$base_asset_main_market]['USD']) &&
+        !empty($rates[$quote_asset_main_market]['USD'])
+    ) {
         $rates = [
-            'BTC' => ($orderbooks['BTC/USDT'][$market_discovery_exchange]['bids'][0][0] +$orderbooks['BTC/USDT'][$market_discovery_exchange]['asks'][0][0]) / 2,
-            'USDT' => 1
+            $base_asset_main_market => $rates[$base_asset_main_market]['USD'],
+            $quote_asset_main_market => $rates[$quote_asset_main_market]['USD']
         ];
         $max_deal_amounts = Filter::getDealAmountByRate($rates, $max_deal_amount);
 
         if ($balances) {
             $must_orders = LimitationBalance::get($balances, $assets, $common_symbols, $max_deal_amounts, $amount_limitations);
 
-            $min_profit = $spread_bot->getMinProfit($balances, $min_profits, $rates);
+            $min_profit = $spread_bot->getMinProfit($balances, $min_profits, $rates, $base_asset_main_market, $quote_asset_main_market);
 
             foreach ($common_symbols as $symbol) {
                 if (!empty($orderbooks[$symbol][$exchange]) && !empty($orderbooks[$symbol][$market_discovery_exchange])) {
@@ -96,7 +101,7 @@ while (true) {
                         'market_discovery_ask' => $market_discovery['ask'],
                         'profit_bid' => $profit['bid'],
                         'profit_ask' => $profit['ask'],
-                        'K_btc' => round($balances['BTC']['total'] * $rates['BTC'] / ($balances['BTC']['total'] * $rates['BTC'] + $balances['USDT']['total']), 4),
+                        'K_btc' => round($balances[$base_asset_main_market]['total'] * $rates[$base_asset_main_market] / ($balances[$base_asset_main_market]['total'] * $rates[$base_asset_main_market] + $balances[$quote_asset_main_market]['total']), 4),
                         'min_profit_bid' => $min_profit['bid'],
                         'min_profit_ask' => $min_profit['ask'],
                         'real_orders_for_symbol_sell' => count($real_orders_for_symbol['sell']),
