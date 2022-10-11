@@ -29,7 +29,6 @@ $markets = $config['markets'][$exchange];
 $assets = $config['assets'][$exchange];
 $common_symbols = array_column($markets, 'common_symbol');
 $main_market = $common_symbols[0];
-list($base_asset_main_market, $quote_asset_main_market) = explode('/', $main_market);
 
 Debug::switchOn($debug);
 
@@ -49,21 +48,24 @@ while (true) {
 
     [$orderbooks, $rates] = [$all_data['orderbooks'], $all_data['rates']];
 
-    if (
-        !empty($rates[$base_asset_main_market]['USD']) &&
-        !empty($rates[$quote_asset_main_market]['USD'])
-    ) {
-        if ($balances) {
-            $rates = [
-                $base_asset_main_market => $rates[$base_asset_main_market]['USD'],
-                $quote_asset_main_market => $rates[$quote_asset_main_market]['USD']
-            ];
-            $min_deal_amounts = Filter::getDealAmountByRate($rates, $min_deal_amount);
+    if ($balances) {
 
-            $min_profit = $spread_bot_market->getMinProfit($balances, $min_profits, $rates, $base_asset_main_market, $quote_asset_main_market);
+        foreach ($common_symbols as $symbol)
+            if (!empty($orderbooks[$symbol][$exchange]) && !empty($orderbooks[$symbol][$market_discovery_exchange])) {
+                list($base_asset, $quote_asset) = explode('/', $symbol);
 
-            foreach ($common_symbols as $symbol)
-                if (!empty($orderbooks[$symbol][$exchange]) && !empty($orderbooks[$symbol][$market_discovery_exchange])) {
+                if (
+                    !empty($rates[$base_asset]['USD']) &&
+                    !empty($rates[$quote_asset]['USD'])
+                ) {
+                    $rates = [
+                        $base_asset => $rates[$base_asset]['USD'],
+                        $quote_asset => $rates[$quote_asset]['USD']
+                    ];
+                    $min_deal_amounts = Filter::getDealAmountByRate($rates, $min_deal_amount);
+
+                    $min_profit = $spread_bot_market->getMinProfit($balances, $min_profits, $rates, $base_asset, $quote_asset);
+
                     $market = $spread_bot_market->getMarket($markets, $symbol);
 
                     $market_discovery = $spread_bot_market->getBestOrderbook($orderbooks, $symbol, false);
@@ -71,8 +73,6 @@ while (true) {
                     $profit = $spread_bot_market->getProfit($market_discovery, $min_profit[$symbol]);
 
                     $exchange_orderbook = $spread_bot_market->getBestOrderbook($orderbooks, $symbol);
-
-                    list($base_asset, $quote_asset) = explode('/', $symbol);
 
                     $debug_data = [
                         'symbol' => $symbol,
@@ -108,7 +108,7 @@ while (true) {
                                 'market',
                                 $side,
                                 $amount,
-                                $price
+                                0
                             );
 
                             $balances = $bot_only_for_balances->getBalances($assets);
@@ -138,7 +138,7 @@ while (true) {
                                 'market',
                                 $side,
                                 $amount,
-                                $price
+                                0
                             );
 
                             $balances = $bot_only_for_balances->getBalances($assets);
@@ -151,12 +151,13 @@ while (true) {
 
                     if (TimeV2::up(60, 'algo_info' . $symbol, true))
                         Debug::printAll($debug_data ?? [], $balances, [], $exchange);
-                } elseif (TimeV2::up(1, 'empty_orderbooks' . $symbol)) {
-                    if (empty($orderbooks[$symbol][$exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$exchange]');
-                    if (empty($orderbooks[$symbol][$market_discovery_exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$market_discovery_exchange]');
                 }
-        } elseif (TimeV2::up(1, 'empty_data', true)) Debug::echo('[WARNING] Empty $balances');
-    } elseif (TimeV2::up(1, 'no_rates', true)) Debug::echo('[WARNING] No rates');
+                elseif (TimeV2::up(1, 'no_rates', true)) Debug::echo('[WARNING] No rates');
+            } elseif (TimeV2::up(1, 'empty_orderbooks' . $symbol)) {
+                if (empty($orderbooks[$symbol][$exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$exchange]');
+                if (empty($orderbooks[$symbol][$market_discovery_exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$market_discovery_exchange]');
+            }
+    } elseif (TimeV2::up(1, 'empty_data', true)) Debug::echo('[WARNING] Empty $balances');
 
     if (TimeV2::up(5, 'balance', true))
         $balances = $bot_only_for_balances->getBalances($assets);
