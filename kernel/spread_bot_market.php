@@ -141,6 +141,8 @@ while (true) {
 
                             $balances = $bot_only_for_balances->getBalances($assets);
 
+
+                            Debug::printAll($debug_data, $balances, [], $exchange);
                             Debug::echo('[INFO] Create Market: ' . $symbol . ', ' . $side . ', ' . $amount . ', ' . $price);
                         }
                     }
@@ -153,4 +155,7 @@ while (true) {
 
     if (TimeV2::up(5, 'balance'))
         $balances = $bot_only_for_balances->getBalances($assets);
+
+    if (TimeV2::up(60, 'algo_info'))
+        Debug::printAll($debug_data ?? [], $balances, [], $exchange);
 }
