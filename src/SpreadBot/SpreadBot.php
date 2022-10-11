@@ -18,11 +18,12 @@ class SpreadBot
 
     public function getMinProfit(array $balances, array $min_profits, array $rates, string $base_asset_main_market, string $quote_asset_main_market): array
     {
-        $btc_in_usdt = $balances[$base_asset_main_market]['total'] * $rates[$base_asset_main_market];
-        $K_btc = round($btc_in_usdt / ($btc_in_usdt + $balances[$quote_asset_main_market]['total']), 4);
+        $base_in_usd = $balances[$base_asset_main_market]['total'] * $rates[$base_asset_main_market];
+        $quote_in_usd = $balances[$quote_asset_main_market]['total'] * $rates[$quote_asset_main_market];
+        $K_btc = round($base_in_usd / ($base_in_usd + $quote_in_usd), 4);
 
         foreach ($min_profits as $K_btc_value => $profit_bid_and_ask)
-            if ($K_btc_value > $K_btc)
+            if ($K_btc_value >= $K_btc)
                 return [
                     'bid' => $profit_bid_and_ask['profit_bid'],
                     'ask' => $profit_bid_and_ask['profit_ask']
