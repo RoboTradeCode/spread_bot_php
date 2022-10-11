@@ -58,13 +58,13 @@ while (true) {
                     !empty($rates[$base_asset]['USD']) &&
                     !empty($rates[$quote_asset]['USD'])
                 ) {
-                    $rates = [
+                    $my_rates = [
                         $base_asset => $rates[$base_asset]['USD'],
                         $quote_asset => $rates[$quote_asset]['USD']
                     ];
-                    $min_deal_amounts = Filter::getDealAmountByRate($rates, $min_deal_amount);
+                    $min_deal_amounts = Filter::getDealAmountByRate($my_rates, $min_deal_amount);
 
-                    $min_profit = $spread_bot_market->getMinProfit($balances, $min_profits, $rates, $base_asset, $quote_asset);
+                    $min_profit = $spread_bot_market->getMinProfit($balances, $min_profits, $my_rates, $base_asset, $quote_asset);
 
                     $market = $spread_bot_market->getMarket($markets, $symbol);
 
@@ -151,8 +151,7 @@ while (true) {
 
                     if (TimeV2::up(60, 'algo_info' . $symbol, true))
                         Debug::printAll($debug_data ?? [], $balances, [], $exchange);
-                }
-                elseif (TimeV2::up(1, 'no_rates', true)) Debug::echo('[WARNING] No rates');
+                } elseif (TimeV2::up(1, 'no_rates', true)) Debug::echo('[WARNING] No rates for ' . $base_asset . ' and ' . $quote_asset);
             } elseif (TimeV2::up(1, 'empty_orderbooks' . $symbol)) {
                 if (empty($orderbooks[$symbol][$exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$exchange]');
                 if (empty($orderbooks[$symbol][$market_discovery_exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$market_discovery_exchange]');
