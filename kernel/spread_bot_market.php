@@ -146,6 +146,9 @@ while (true) {
                             Debug::echo('[INFO] Create Market: ' . $symbol . ', ' . $side . ', ' . $amount . ', ' . $price);
                         }
                     }
+
+                    if (TimeV2::up(60, 'algo_info' . $symbol))
+                        Debug::printAll($debug_data ?? [], $balances, [], $exchange);
                 } elseif (TimeV2::up(1, 'empty_orderbooks' . $symbol)) {
                     if (empty($orderbooks[$symbol][$exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$exchange]');
                     if (empty($orderbooks[$symbol][$market_discovery_exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$market_discovery_exchange]');
@@ -155,7 +158,4 @@ while (true) {
 
     if (TimeV2::up(5, 'balance'))
         $balances = $bot_only_for_balances->getBalances($assets);
-
-    if (TimeV2::up(60, 'algo_info'))
-        Debug::printAll($debug_data ?? [], $balances, [], $exchange);
 }
