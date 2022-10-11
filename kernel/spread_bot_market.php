@@ -149,15 +149,15 @@ while (true) {
                         }
                     }
 
-                    if (TimeV2::up(60, 'algo_info' . $symbol))
+                    if (TimeV2::up(60, 'algo_info' . $symbol, true))
                         Debug::printAll($debug_data ?? [], $balances, [], $exchange);
                 } elseif (TimeV2::up(1, 'empty_orderbooks' . $symbol)) {
                     if (empty($orderbooks[$symbol][$exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$exchange]');
                     if (empty($orderbooks[$symbol][$market_discovery_exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$market_discovery_exchange]');
                 }
-        } elseif (TimeV2::up(1, 'empty_data')) Debug::echo('[WARNING] Empty $balances');
-    } elseif (TimeV2::up(1, 'no_rates')) Debug::echo('[WARNING] No rates');
+        } elseif (TimeV2::up(1, 'empty_data', true)) Debug::echo('[WARNING] Empty $balances');
+    } elseif (TimeV2::up(1, 'no_rates', true)) Debug::echo('[WARNING] No rates');
 
-    if (TimeV2::up(5, 'balance'))
+    if (TimeV2::up(5, 'balance', true))
         $balances = $bot_only_for_balances->getBalances($assets);
 }
