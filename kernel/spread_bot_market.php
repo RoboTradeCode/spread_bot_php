@@ -91,8 +91,8 @@ while (true) {
                     if ($exchange_orderbook['bid'] > $profit['bid'] * (1 + $fees[$exchange] / 100)) {
                         $sum = 0;
                         foreach ($orderbooks[$symbol][$exchange]['bids'] as $bid) {
-                            if ($bid[0][0] > $profit['bid']) {
-                                $sum += $bid[0][1];
+                            if ($bid[0] > $profit['bid']) {
+                                $sum += $bid[1];
                                 break;
                             }
                         }
@@ -120,8 +120,8 @@ while (true) {
                     if ($exchange_orderbook['ask'] < $profit['ask'] * (1 - $fees[$exchange] / 100)) {
                         $sum = 0;
                         foreach ($orderbooks[$symbol][$exchange]['asks'] as $ask) {
-                            if ($ask[0][0] < $profit['ask']) {
-                                $sum += $ask[0][1];
+                            if ($ask[0] < $profit['ask']) {
+                                $sum += $ask[1];
                                 break;
                             }
                         }
