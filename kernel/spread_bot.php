@@ -68,16 +68,16 @@ while (true) {
         !empty($rates[$base_asset_main_market]['USD']) &&
         !empty($rates[$quote_asset_main_market]['USD'])
     ) {
-        $rates = [
-            $base_asset_main_market => $rates[$base_asset_main_market]['USD'],
-            $quote_asset_main_market => $rates[$quote_asset_main_market]['USD']
-        ];
-        $max_deal_amounts = Filter::getDealAmountByRate($rates, $max_deal_amount);
-
         if ($balances) {
+            $my_rates = [
+                $base_asset_main_market => $rates[$base_asset_main_market]['USD'],
+                $quote_asset_main_market => $rates[$quote_asset_main_market]['USD']
+            ];
+            $max_deal_amounts = Filter::getDealAmountByRate($my_rates, $max_deal_amount);
+
             $must_orders = LimitationBalance::get($balances, $assets, $common_symbols, $max_deal_amounts, $amount_limitations);
 
-            $min_profit = $spread_bot->getMinProfit($balances, $min_profits, $rates, $base_asset_main_market, $quote_asset_main_market);
+            $min_profit = $spread_bot->getMinProfit($balances, $min_profits, $my_rates, $base_asset_main_market, $quote_asset_main_market);
 
             foreach ($common_symbols as $symbol) {
                 if (!empty($orderbooks[$symbol][$exchange]) && !empty($orderbooks[$symbol][$market_discovery_exchange])) {
@@ -101,7 +101,6 @@ while (true) {
                         'market_discovery_ask' => $market_discovery['ask'],
                         'profit_bid' => $profit['bid'],
                         'profit_ask' => $profit['ask'],
-                        'K_btc' => round($balances[$base_asset_main_market]['total'] * $rates[$base_asset_main_market] / ($balances[$base_asset_main_market]['total'] * $rates[$base_asset_main_market] + $balances[$quote_asset_main_market]['total']), 4),
                         'min_profit_bid' => $min_profit['bid'],
                         'min_profit_ask' => $min_profit['ask'],
                         'real_orders_for_symbol_sell' => count($real_orders_for_symbol['sell']),
