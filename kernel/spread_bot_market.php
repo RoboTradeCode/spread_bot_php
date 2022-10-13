@@ -84,11 +84,11 @@ while (true) {
                         'profit_ask' => $profit['ask'],
                         'exchange_bid' => $exchange_orderbook['bid'],
                         'exchange_ask' => $exchange_orderbook['ask'],
-                        'profit_bid_with_fee' => $profit['bid'] * (1 - $fees[$exchange] / 100),
-                        'profit_ask_with_fee' => $profit['ask'] * (1 + $fees[$exchange] / 100)
+                        'profit_bid_with_fee' => $profit['bid'] * (1 + $fees[$exchange] / 100),
+                        'profit_ask_with_fee' => $profit['ask'] * (1 - $fees[$exchange] / 100)
                     ];
 
-                    $profit_bid_with_fee = $profit['bid'] * (1 - $fees[$exchange] / 100);
+                    $profit_bid_with_fee = $profit['bid'] * (1 + $fees[$exchange] / 100);
                     if ($exchange_orderbook['bid'] > $profit_bid_with_fee) {
                         $sum = 0;
                         foreach ($orderbooks[$symbol][$exchange]['bids'] as $bid) {
@@ -118,7 +118,7 @@ while (true) {
                         }
                     }
 
-                    $profit_ask_with_fee = $profit['ask'] * (1 + $fees[$exchange] / 100);
+                    $profit_ask_with_fee = $profit['ask'] * (1 - $fees[$exchange] / 100);
                     if ($exchange_orderbook['ask'] < $profit_ask_with_fee) {
                         $sum = 0;
                         foreach ($orderbooks[$symbol][$exchange]['asks'] as $ask) {
