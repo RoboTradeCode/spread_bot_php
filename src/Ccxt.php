@@ -8,7 +8,7 @@ use Throwable;
 
 class Ccxt
 {
-    private Exchange $exchange;
+    protected Exchange $exchange;
 
     public function __construct($exchange_name, $api_public = '', $api_secret = '', $api_password = '', $api_uid = '', $enableRateLimit = false)
     {
