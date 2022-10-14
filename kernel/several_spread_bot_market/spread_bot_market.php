@@ -43,7 +43,7 @@ $multi_core = new MemcachedData($exchange, $market_discovery_exchange, $markets,
 $spread_bot_market = new SpreadBotMarket($exchange, $market_discovery_exchange);
 
 $bot = new Exmo($keys[0]['api_key'], $keys[0]['secret_key']);
-$bot_only_for_balances = new Exmo($exchange, $keys[1]['api_key'], $keys[1]['secret_key']);
+$bot_only_for_balances = new Exmo($keys[1]['api_key'], $keys[1]['secret_key']);
 
 $balances = $bot_only_for_balances->getBalances($assets);
 
@@ -71,14 +71,14 @@ while (true) {
                 $exchange_orderbook = $spread_bot_market->getBestOrderbook($orderbooks, $symbol);
                 $market_discovery = $spread_bot_market->getBestOrderbook($orderbooks, $symbol, false);
 
-                $profit = $spread_bot_market->getProfit($market_discovery, $min_profit[$symbol]);
+                $profit = $spread_bot_market->getProfit($market_discovery, $min_profit);
 
                 $debug_data = [
                     'symbol' => $symbol,
                     'market_discovery_bid' => $market_discovery['bid'],
                     'market_discovery_ask' => $market_discovery['ask'],
-                    'min_profit_bid' => $min_profit[$symbol]['bid'],
-                    'min_profit_ask' => $min_profit[$symbol]['ask'],
+                    'min_profit_bid' => $min_profit['bid'],
+                    'min_profit_ask' => $min_profit['ask'],
                     'profit_bid' => $profit['bid'],
                     'profit_ask' => $profit['ask'],
                     'exchange_bid' => $exchange_orderbook['bid'],
