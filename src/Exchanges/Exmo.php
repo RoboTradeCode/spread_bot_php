@@ -58,6 +58,9 @@ class Exmo extends Ccxt
                 ]
             ), true);
 
+            if (!$order['result'])
+                return [];
+
             $order['symbol'] = $symbol;
             $order['side'] = $side;
             $order['amount'] = $amount;
