@@ -57,6 +57,12 @@ class Exmo extends Ccxt
                     'Sign: ' . hash_hmac('sha512', $post_data, $this->api_secret)
                 ]
             ), true);
+
+            $order['symbol'] = $symbol;
+            $order['side'] = $side;
+            $order['amount'] = $amount;
+            $order['price'] = $price;
+            $order['status'] = 'open';
         } catch (Throwable $e) {
             echo '[ERROR] ' . $e->getMessage() . PHP_EOL;
         }
