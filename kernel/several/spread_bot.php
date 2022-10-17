@@ -28,8 +28,8 @@ $debug = $config['debug'];
 $sleep = $config['sleep'];
 $max_deal_amount = $config['max_deal_amount'];
 $fees = $config['fees'];
-$max_orders = $config['max_orders'][$symbol];
-$min_profits = $config['min_profits'][$symbol];
+$max_orders = $config['max_orders'];
+$min_profits = $config['min_profits'];
 $keys = $config['keys'][$exchange][$symbol];
 $markets = $config['markets'][$exchange];
 
