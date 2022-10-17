@@ -1,6 +1,5 @@
 <?php
 
-use Src\Ccxt;
 use Src\Configurator;
 use Src\Debug;
 use Src\Exchanges\Exmo;
@@ -27,8 +26,9 @@ $expired_orderbook_time = $config['expired_orderbook_time'];
 $debug = $config['debug'];
 $sleep = $config['sleep'];
 $min_deal_amount = $config['min_deal_amount'];
-$min_profits = $config['min_profits'];
+$balance_limitation_in_usd = $config['balance_limitation_in_usd'];
 $fees = $config['fees'];
+$min_profits = $config['min_profits'];
 $keys = $config['keys'][$exchange][$symbol];
 $markets = $config['markets'][$exchange];
 
@@ -64,6 +64,7 @@ while (true) {
                 $quote_asset => $rates[$quote_asset]['USD']
             ];
             $min_deal_amounts = Filter::getDealAmountByRate($my_rates, $min_deal_amount);
+            $balance_limitations = Filter::getDealAmountByRate($my_rates, $balance_limitation_in_usd);
 
             $min_profit = $spread_bot_market->getMinProfit($balances, $min_profits, $my_rates, $base_asset, $quote_asset);
 
@@ -97,10 +98,21 @@ while (true) {
                         }
                     }
 
-                    if ($balances[$base_asset]['free'] * 0.99 > $min_deal_amounts[$base_asset] && $sum != 0) {
+                    if (
+                        $balances[$base_asset]['free'] * 0.99 > $min_deal_amounts[$base_asset] &&
+                        $sum != 0 &&
+                        $balances[$base_asset]['free'] * 0.99 < ($balance_limitations[$base_asset] - $min_deal_amounts[$base_asset])
+                    ) {
                         $side = 'sell';
                         $price = $spread_bot_market->incrementNumber($profit_bid_with_fee, $market['price_increment']);
-                        $amount = $spread_bot_market->incrementNumber(min($sum, $balances[$base_asset]['free'] * 0.99), $market['amount_increment']);
+                        $amount = $spread_bot_market->incrementNumber(
+                            min(
+                                $sum,
+                                $balances[$base_asset]['free'] * 0.99,
+                                $balance_limitations[$base_asset] - $balances[$base_asset]['free'] * 0.99
+                            ),
+                            $market['amount_increment']
+                        );
 
                         $create_order = $bot->createOrder(
                             $symbol,
@@ -128,10 +140,21 @@ while (true) {
                         }
                     }
 
-                    if ($balances[$quote_asset]['free'] * 0.99 > $min_deal_amounts[$quote_asset] && $sum != 0) {
+                    if (
+                        $balances[$quote_asset]['free'] * 0.99 > $min_deal_amounts[$quote_asset] &&
+                        $sum != 0 &&
+                        $balances[$quote_asset]['free'] * 0.99 < ($balance_limitations[$quote_asset] - $min_deal_amounts[$quote_asset])
+                    ) {
                         $side = 'buy';
                         $price = $spread_bot_market->incrementNumber($profit_ask_with_fee, $market['price_increment']);
-                        $amount = $spread_bot_market->incrementNumber(min($sum, $balances[$quote_asset]['free'] * 0.99 / $price), $market['amount_increment']);
+                        $amount = $spread_bot_market->incrementNumber(
+                            min(
+                                $sum,
+                                $balances[$quote_asset]['free'] * 0.99 / $price,
+                                ($balance_limitations[$quote_asset] - $balances[$quote_asset]['free'] * 0.99) / $price
+                            ),
+                            $market['amount_increment']
+                        );
 
                         $create_order = $bot->createOrder(
                             $symbol,
