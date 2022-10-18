@@ -111,7 +111,7 @@ while (true) {
                         $exchange_orderbook, $profit, $balances, $quote_asset,
                         $max_deal_amounts, $real_orders_for_symbol, $max_orders, $price
                     ) &&
-                    $balances[$base_asset]['free'] * 0.99 < ($balance_limitation[$base_asset] * $balance_limitations[$base_asset])
+                    ($balances[$quote_asset]['free'] > ($balance_limitation[$quote_asset] * $balance_limitations[$quote_asset]) || $balances[$base_asset]['free'] * 0.99 < ($balance_limitation[$base_asset] * $balance_limitations[$base_asset]))
                 ) {
                     $side = 'buy';
                     $amount = $spread_bot->incrementNumber($max_deal_amounts[$base_asset], $market['amount_increment']);
@@ -154,7 +154,7 @@ while (true) {
                         $exchange_orderbook, $profit, $balances, $base_asset,
                         $max_deal_amounts, $real_orders_for_symbol, $max_orders, $price
                     ) &&
-                    $balances[$quote_asset]['free'] * 0.99 < ($balance_limitation[$quote_asset] * $balance_limitations[$quote_asset])
+                    ($balances[$base_asset]['free'] > ($balance_limitation[$base_asset] * $balance_limitations[$base_asset]) || $balances[$quote_asset]['free'] * 0.99 < ($balance_limitation[$quote_asset] * $balance_limitations[$quote_asset]))
                 ) {
                     $side = 'sell';
                     $amount = $spread_bot->incrementNumber($max_deal_amounts[$base_asset], $market['amount_increment']);

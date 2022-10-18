@@ -25,7 +25,7 @@ class SpreadBotMarket
                     'ask' => $profit_bid_and_ask['profit_ask']
                 ];
 
-        return $format_min_profit ?? [];
+        return [];
     }
 
     public function getBestOrderbook(array $orderbooks, string $symbol, bool $is_exchange = true): array

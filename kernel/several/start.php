@@ -10,6 +10,6 @@ $config = Configurator::getConfigFromFile('several_spread_bot');
 $markets = $config['use_markets'];
 
 foreach ($markets as $market) {
-    Pm2::start(__DIR__ . '/spread_bot.php', 'SPREAD BOT ' . $market, 'algorithm', [$market]);
+    Pm2::start(__DIR__ . '/spread_bot.php', 'SPREAD BOT LIMIT' . $market, 'algorithm', [$market]);
     echo '[' . date('Y-m-d H:i:s') . '] Start: ' . $market . PHP_EOL;
 }
