@@ -110,7 +110,7 @@ while (true) {
                             min(
                                 $sum,
                                 $balances[$base_asset]['free'] * 0.99,
-                                ($balance_limitations[$quote_asset] - $balances[$quote_asset]['free'] * 0.99) / $price
+                                (($balance_limitation[$quote_asset] * $balance_limitations[$quote_asset]) - $balances[$quote_asset]['free'] * 0.99) / $price
                             ),
                             $market['amount_increment']
                         );
@@ -152,7 +152,7 @@ while (true) {
                             min(
                                 $sum,
                                 $balances[$quote_asset]['free'] * 0.99 / $price,
-                                ($balance_limitations[$base_asset] - $balances[$base_asset]['free'] * 0.99) / $price
+                                (($balance_limitation[$base_asset] * $balance_limitations[$base_asset]) - $balances[$base_asset]['free'] * 0.99) / $price
                             ),
                             $market['amount_increment']
                         );
