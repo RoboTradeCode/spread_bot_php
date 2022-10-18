@@ -27,6 +27,7 @@ $debug = $config['debug'];
 $sleep = $config['sleep'];
 $min_deal_amount = $config['min_deal_amount'];
 $balance_limitation_in_usd = $config['balance_limitation_in_usd'];
+$balance_limitation = $config['balance_limitation'];
 $fees = $config['fees'];
 $min_profits = $config['min_profits'];
 $keys = $config['keys'][$exchange][$symbol];
@@ -101,7 +102,7 @@ while (true) {
                     if (
                         $balances[$base_asset]['free'] * 0.99 > $min_deal_amounts[$base_asset] &&
                         $sum != 0 &&
-                        $balances[$quote_asset]['free'] * 0.99 < ($balance_limitations[$quote_asset] - $min_deal_amounts[$quote_asset])
+                        $balances[$quote_asset]['free'] * 0.99 < (($balance_limitation[$quote_asset] * $balance_limitations[$quote_asset]) - $min_deal_amounts[$quote_asset])
                     ) {
                         $side = 'sell';
                         $price = $spread_bot_market->incrementNumber($profit_bid_with_fee, $market['price_increment']);
@@ -143,7 +144,7 @@ while (true) {
                     if (
                         $balances[$quote_asset]['free'] * 0.99 > $min_deal_amounts[$quote_asset] &&
                         $sum != 0 &&
-                        $balances[$base_asset]['free'] * 0.99 < ($balance_limitations[$base_asset] - $min_deal_amounts[$base_asset])
+                        $balances[$base_asset]['free'] * 0.99 < (($balance_limitation[$base_asset] * $balance_limitations[$base_asset]) - $min_deal_amounts[$base_asset])
                     ) {
                         $side = 'buy';
                         $price = $spread_bot_market->incrementNumber($profit_ask_with_fee, $market['price_increment']);

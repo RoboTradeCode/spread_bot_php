@@ -27,7 +27,10 @@ $market_discovery_exchange = $config['market_discovery_exchange'];
 $expired_orderbook_time = $config['expired_orderbook_time'];
 $debug = $config['debug'];
 $sleep = $config['sleep'];
+$aggressive = $config['aggressive'];
 $max_deal_amount = $config['max_deal_amount'];
+$balance_limitation_in_usd = $config['balance_limitation_in_usd'];
+$balance_limitation = $config['balance_limitation'];
 $fees = $config['fees'];
 $max_orders = $config['max_orders'];
 $min_profits = $config['min_profits'];
@@ -69,6 +72,7 @@ while (true) {
                 $quote_asset => $rates[$quote_asset]['USD']
             ];
             $max_deal_amounts = Filter::getDealAmountByRate($my_rates, $max_deal_amount);
+            $balance_limitations = Filter::getDealAmountByRate($my_rates, $balance_limitation_in_usd);
 
             $min_profit = $spread_bot->getMinProfit($balances, $min_profits, $my_rates, $base_asset, $quote_asset);
 
@@ -96,13 +100,18 @@ while (true) {
                     'must_order_buy' => $max_orders['buy']
                 ];
 
-                $price = $spread_bot->incrementNumber($exchange_orderbook['bid'], $market['price_increment']);
+                if ($aggressive) {
+                    $price = $spread_bot->incrementNumber($exchange_orderbook['bid'] + 2 * $market['price_increment'], $market['price_increment']);
+                } else {
+                    $price = $spread_bot->incrementNumber($exchange_orderbook['bid'], $market['price_increment']);
+                }
 
                 if (
                     $spread_bot->isCreateBuyOrder(
                         $exchange_orderbook, $profit, $balances, $quote_asset,
                         $max_deal_amounts, $real_orders_for_symbol, $max_orders, $price
-                    )
+                    ) &&
+                    $balances[$base_asset]['free'] * 0.99 < ($balance_limitation[$base_asset] * $balance_limitations[$base_asset])
                 ) {
                     $side = 'buy';
                     $amount = $spread_bot->incrementNumber($max_deal_amounts[$base_asset], $market['amount_increment']);
@@ -133,13 +142,19 @@ while (true) {
                     Debug::echo('[INFO] Create: ' . $symbol . ', ' . $side . ', ' . $amount . ', ' . $price);
                 }
 
-                $price = $spread_bot->incrementNumber($exchange_orderbook['ask'], $market['price_increment']);
+
+                if ($aggressive) {
+                    $price = $spread_bot->incrementNumber($exchange_orderbook['ask'] - $market['price_increment'], $market['price_increment']);
+                } else {
+                    $price = $spread_bot->incrementNumber($exchange_orderbook['ask'], $market['price_increment']);
+                }
 
                 if (
                     $spread_bot->isCreateSellOrder(
                         $exchange_orderbook, $profit, $balances, $base_asset,
                         $max_deal_amounts, $real_orders_for_symbol, $max_orders, $price
-                    )
+                    ) &&
+                    $balances[$quote_asset]['free'] * 0.99 < ($balance_limitation[$quote_asset] * $balance_limitations[$quote_asset])
                 ) {
                     $side = 'sell';
                     $amount = $spread_bot->incrementNumber($max_deal_amounts[$base_asset], $market['amount_increment']);
