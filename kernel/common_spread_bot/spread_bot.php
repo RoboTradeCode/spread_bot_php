@@ -21,7 +21,7 @@ $memcached = new Memcached();
 $memcached->addServer('localhost', 11211);
 $memcached->flush();
 
-$config = Configurator::getConfigFromFile('several_spread_bot');
+$config = Configurator::getConfigFromFile('common_spread_bot');
 
 $exchange = $config['exchange'];
 $market_discovery_exchange = $config['market_discovery_exchange'];
