@@ -115,19 +115,21 @@ while (true) {
                             $market['amount_increment']
                         );
 
-                        $create_order = $bot->createOrder(
-                            $symbol,
-                            'limit',
-                            $side,
-                            $amount,
-                            $price,
-                            'ioc'
-                        );
+                        if ($amount >= $min_deal_amounts[$base_asset]) {
+                            $create_order = $bot->createOrder(
+                                $symbol,
+                                'limit',
+                                $side,
+                                $amount,
+                                $price,
+                                'ioc'
+                            );
 
-                        $balances = $bot_only_for_balances->getBalances($assets);
+                            $balances = $bot_only_for_balances->getBalances($assets);
 
-                        Debug::printAll($debug_data, $balances, [], $exchange);
-                        Debug::echo('[INFO] Create Market: ' . $symbol . ', ' . $side . ', ' . $amount . ', ' . $price);
+                            Debug::printAll($debug_data, $balances, [], $exchange);
+                            Debug::echo('[INFO] Create Market: ' . $symbol . ', ' . $side . ', ' . $amount . ', ' . $price);
+                        }
                     }
                 }
 
@@ -157,20 +159,22 @@ while (true) {
                             $market['amount_increment']
                         );
 
-                        $create_order = $bot->createOrder(
-                            $symbol,
-                            'limit',
-                            $side,
-                            $amount,
-                            $price,
-                            'ioc'
-                        );
+                        if ($amount >= $min_deal_amounts[$base_asset]) {
+                            $create_order = $bot->createOrder(
+                                $symbol,
+                                'limit',
+                                $side,
+                                $amount,
+                                $price,
+                                'ioc'
+                            );
 
-                        $balances = $bot_only_for_balances->getBalances($assets);
+                            $balances = $bot_only_for_balances->getBalances($assets);
 
 
-                        Debug::printAll($debug_data, $balances, [], $exchange);
-                        Debug::echo('[INFO] Create Market: ' . $symbol . ', ' . $side . ', ' . $amount . ', ' . $price);
+                            Debug::printAll($debug_data, $balances, [], $exchange);
+                            Debug::echo('[INFO] Create Market: ' . $symbol . ', ' . $side . ', ' . $amount . ', ' . $price);
+                        }
                     }
                 }
 
