@@ -35,6 +35,7 @@ $balance_limitation_in_usd = $config['balance_limitation_in_usd'];
 $balance_limitation = $config['balance_limitation'];
 $fees = $config['fees'];
 $max_orders = $config['max_orders'];
+$order_profits = $config['order_profits'];
 $min_profits = $config['min_profits'];
 $keys = $config['keys'][$exchange][$symbol];
 $markets = $config['markets'][$exchange];
@@ -104,17 +105,10 @@ while (true) {
                     'must_order_buy' => $max_orders['buy']
                 ];
 
-                if ($aggressive) {
-                    $price = $spread_bot->incrementNumber($exchange_orderbook['bid'] + 2 * $market['price_increment'], $market['price_increment']);
-                } else {
-                    $price = $spread_bot->incrementNumber($exchange_orderbook['bid'], $market['price_increment']);
-                }
+                $price = $spread_bot->incrementNumber($profit['bid'] * (1 - $order_profits['bid']['start'] / 100), $market['price_increment']);
 
                 if (
-                    $spread_bot->isCreateBuyOrder(
-                        $exchange_orderbook, $profit, $balances, $quote_asset,
-                        $max_deal_amounts, $real_orders_for_symbol, $max_orders, $price
-                    ) &&
+                    $spread_bot->isCreateBuyOrder($balances, $quote_asset, $max_deal_amounts, $real_orders_for_symbol, $max_orders, $price) &&
                     ($balances[$quote_asset]['free'] > ($balance_limitation[$quote_asset] * $balance_limitations[$quote_asset]) || $balances[$base_asset]['free'] * 0.99 < ($balance_limitation[$base_asset] * $balance_limitations[$base_asset]))
                 ) {
                     $side = 'buy';
@@ -146,18 +140,10 @@ while (true) {
                     Debug::echo('[INFO] Create: ' . $symbol . ', ' . $side . ', ' . $amount . ', ' . $price);
                 }
 
-
-                if ($aggressive) {
-                    $price = $spread_bot->incrementNumber($exchange_orderbook['ask'] - $market['price_increment'], $market['price_increment']);
-                } else {
-                    $price = $spread_bot->incrementNumber($exchange_orderbook['ask'], $market['price_increment']);
-                }
+                $price = $spread_bot->incrementNumber($profit['ask'] * (1 + $order_profits['ask']['start'] / 100), $market['price_increment']);
 
                 if (
-                    $spread_bot->isCreateSellOrder(
-                        $exchange_orderbook, $profit, $balances, $base_asset,
-                        $max_deal_amounts, $real_orders_for_symbol, $max_orders, $price
-                    ) &&
+                    $spread_bot->isCreateSellOrder($balances, $base_asset, $max_deal_amounts, $real_orders_for_symbol, $max_orders, $price) &&
                     ($balances[$base_asset]['free'] > ($balance_limitation[$base_asset] * $balance_limitations[$base_asset]) || $balances[$quote_asset]['free'] * 0.99 < ($balance_limitation[$quote_asset] * $balance_limitations[$quote_asset]))
                 ) {
                     $side = 'sell';
@@ -189,30 +175,11 @@ while (true) {
                     Debug::echo('[INFO] Create: ' . $symbol . ', ' . $side . ', ' . $amount . ', ' . $price);
                 }
 
-                $count_real_orders_for_symbol_sell = count($real_orders_for_symbol['sell']);
-
-                if (
-                    ($count_real_orders_for_symbol_sell > 0) &&
-                    (($count_real_orders_for_symbol_sell >= $max_orders['sell']) || ($balances[$base_asset]['free'] <= $max_deal_amounts[$base_asset]))
-                ) {
-                    $cancel_the_farthest_sell_order = $spread_bot->cancelTheFarthestSellOrder($real_orders_for_symbol['sell']);
-
-                    if (TimeV2::up(5, $cancel_the_farthest_sell_order['id'], true)) {
-                        $bot->cancelOrder($cancel_the_farthest_sell_order['id'], $cancel_the_farthest_sell_order['symbol']);
-                        unset($real_orders[$cancel_the_farthest_sell_order['id']]);
-
-                        $balances = $bot_only_for_balances_and_open_orders->getBalances($assets);
-
-                        Debug::printAll($debug_data, $balances, $real_orders_for_symbol['sell'], $exchange);
-                        Debug::echo('[INFO] Cancel: ' . $cancel_the_farthest_sell_order['id'] . ', ' . $cancel_the_farthest_sell_order['symbol'] . ', ' . $cancel_the_farthest_sell_order['side'] . ', ' . $cancel_the_farthest_sell_order['amount'] . ', ' . $cancel_the_farthest_sell_order['price']);
-                    }
-                }
-
                 $need_get_balance = false;
 
                 foreach ($real_orders_for_symbol['sell'] as $real_orders_for_symbol_sell)
                     if (
-                        ($real_orders_for_symbol_sell['price'] < $profit['ask']) &&
+                        !(($real_orders_for_symbol_sell['price'] * (1 - $order_profits['ask']['end'] / 100)) < $profit['ask'] && ($real_orders_for_symbol_sell['price'] * (1 + $order_profits['ask']['start'])) > $profit['ask']) &&
                         TimeV2::up(5, $real_orders_for_symbol_sell['id'], true)
                     ) {
                         $bot->cancelOrder($real_orders_for_symbol_sell['id'], $real_orders_for_symbol_sell['symbol']);
@@ -223,28 +190,9 @@ while (true) {
                         Debug::echo('[INFO] Cancel: ' . $real_orders_for_symbol_sell['id'] . ', ' . $real_orders_for_symbol_sell['symbol'] . ', ' . $real_orders_for_symbol_sell['side'] . ', ' . $real_orders_for_symbol_sell['amount'] . ', ' . $real_orders_for_symbol_sell['price']);
                     }
 
-                $count_real_orders_for_symbol_buy = count($real_orders_for_symbol['buy']);
-
-                if (
-                    ($count_real_orders_for_symbol_buy > 0) &&
-                    (($count_real_orders_for_symbol_buy >= $max_orders['buy']) || ($balances[$quote_asset]['free'] <= $max_deal_amounts[$quote_asset]))
-                ) {
-                    $cancel_the_farthest_buy_order = $spread_bot->cancelTheFarthestBuyOrder($real_orders_for_symbol['buy']);
-
-                    if (TimeV2::up(5, $cancel_the_farthest_buy_order['id'], true)) {
-                        $bot->cancelOrder($cancel_the_farthest_buy_order['id'], $cancel_the_farthest_buy_order['symbol']);
-                        unset($real_orders[$cancel_the_farthest_buy_order['id']]);
-
-                        $balances = $bot_only_for_balances_and_open_orders->getBalances($assets);
-
-                        Debug::printAll($debug_data, $balances, $real_orders_for_symbol['sell'], $exchange);
-                        Debug::echo('[INFO] Cancel: ' . $cancel_the_farthest_buy_order['id'] . ', ' . $cancel_the_farthest_buy_order['symbol'] . ', ' . $cancel_the_farthest_buy_order['side'] . ', ' . $cancel_the_farthest_buy_order['amount'] . ', ' . $cancel_the_farthest_buy_order['price']);
-                    }
-                }
-
                 foreach ($real_orders_for_symbol['buy'] as $real_orders_for_symbol_buy)
                     if (
-                        ($real_orders_for_symbol_buy['price'] > $profit['bid']) &&
+                        !(($real_orders_for_symbol_buy['price'] * (1 - $order_profits['bid']['start'] / 100)) < $profit['bid'] && ($real_orders_for_symbol_buy['price'] * (1 + $order_profits['bid']['end'])) > $profit['bid']) &&
                         TimeV2::up(5, $real_orders_for_symbol_buy['id'], true)
                     ) {
                         $bot->cancelOrder($real_orders_for_symbol_buy['id'], $real_orders_for_symbol_buy['symbol']);
