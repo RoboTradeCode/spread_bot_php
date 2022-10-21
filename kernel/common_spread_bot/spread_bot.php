@@ -84,8 +84,8 @@ while (true) {
                 $exchange_orderbook = $spread_bot->getBestOrderbook($orderbooks, $symbol);
                 $market_discovery = $spread_bot->getBestOrderbook($orderbooks, $symbol, false);
 
+                // SPREAD BOT LIMIT
                 $profit = $spread_bot->getProfit($market_discovery, $min_profit);
-
                 $real_orders_for_symbol = $spread_bot->filterOrdersBySideAndSymbol($real_orders, $symbol);
 
                 $debug_data = [
@@ -254,6 +254,7 @@ while (true) {
                         Debug::printAll($debug_data, $balances, $real_orders_for_symbol['buy'], $exchange);
                         Debug::echo('[INFO] Cancel: ' . $real_orders_for_symbol_buy['id'] . ', ' . $real_orders_for_symbol_buy['symbol'] . ', ' . $real_orders_for_symbol_buy['side'] . ', ' . $real_orders_for_symbol_buy['amount'] . ', ' . $real_orders_for_symbol_buy['price']);
                     }
+                // SPREAD BOT LIMIT
 
 
                 // SPREAD BOT MARKET
