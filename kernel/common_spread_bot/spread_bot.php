@@ -55,6 +55,7 @@ $bot_create_only = new Exmo($keys[0]['api_key'], $keys[0]['secret_key']);
 $bot = new Ccxt($exchange, $keys[1]['api_key'], $keys[1]['secret_key']);
 $bot_only_for_balances_and_open_orders = new Ccxt($exchange, $keys[2]['api_key'], $keys[2]['secret_key']);
 
+$bot_only_for_balances_and_open_orders->cancelAllOrder();
 $balances = $bot_only_for_balances_and_open_orders->getBalances($assets);
 
 $real_orders = [];
