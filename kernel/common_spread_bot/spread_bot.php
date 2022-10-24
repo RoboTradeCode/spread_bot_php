@@ -180,7 +180,7 @@ while (true) {
 
                 foreach ($real_orders_for_symbol['sell'] as $real_orders_for_symbol_sell)
                     if (
-                        !(($real_orders_for_symbol_sell['price'] * (1 - $order_profits['ask']['end'] / 100)) < $profit['ask'] && ($real_orders_for_symbol_sell['price'] * (1 + $order_profits['ask']['start'])) > $profit['ask']) &&
+                        !($real_orders_for_symbol_sell['price'] > $profit['ask'] && ($real_orders_for_symbol_sell['price'] * (1 - 2 * $order_profits['ask']['end'] / 100)) < $profit['ask']) &&
                         TimeV2::up(5, $real_orders_for_symbol_sell['id'], true)
                     ) {
                         $bot->cancelOrder($real_orders_for_symbol_sell['id'], $real_orders_for_symbol_sell['symbol']);
@@ -193,7 +193,7 @@ while (true) {
 
                 foreach ($real_orders_for_symbol['buy'] as $real_orders_for_symbol_buy)
                     if (
-                        !(($real_orders_for_symbol_buy['price'] * (1 - $order_profits['bid']['start'] / 100)) < $profit['bid'] && ($real_orders_for_symbol_buy['price'] * (1 + $order_profits['bid']['end'])) > $profit['bid']) &&
+                        !($real_orders_for_symbol_buy['price'] < $profit['bid'] && ($real_orders_for_symbol_buy['price'] * (1 + 2 * $order_profits['ask']['end'] / 100)) > $profit['bid']) &&
                         TimeV2::up(5, $real_orders_for_symbol_buy['id'], true)
                     ) {
                         $bot->cancelOrder($real_orders_for_symbol_buy['id'], $real_orders_for_symbol_buy['symbol']);
