@@ -37,7 +37,7 @@ $fees = $config['fees'];
 $max_orders = $config['max_orders'];
 $order_profits = $config['order_profits'];
 $min_profits = $config['min_profits'];
-$keys = $config['keys'][$exchange][$symbol];
+$keys = $config['keys'][$exchange];
 $markets = $config['markets'][$exchange];
 
 $assets = explode('/', $symbol);
