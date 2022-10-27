@@ -10,7 +10,7 @@ use Src\SpreadBot\SpreadBot;
 use Src\SpreadBot\SpreadBotMarket;
 use Src\TimeV2;
 
-require dirname(__DIR__, 2) . '/index.php';
+require dirname(__DIR__, 3) . '/index.php';
 
 if (!isset($argv[1]))
     die('Set parameter: symbol');
@@ -51,10 +51,12 @@ $multi_core = new MemcachedData($exchange, $market_discovery_exchange, $markets,
 $spread_bot = new SpreadBot($exchange, $market_discovery_exchange);
 $spread_bot_market = new SpreadBotMarket($exchange, $market_discovery_exchange);
 
-$bot = new Ccxt($exchange, $keys['api_key'], $keys['secret_key']);
+$bot_create_only = new Exmo($keys[0]['api_key'], $keys[0]['secret_key']);
+$bot = new Ccxt($exchange, $keys[1]['api_key'], $keys[1]['secret_key']);
+$bot_only_for_balances_and_open_orders = new Ccxt($exchange, $keys[2]['api_key'], $keys[2]['secret_key']);
 
-$bot->cancelAllOrder();
-$balances = $bot->getBalances($assets);
+$bot_only_for_balances_and_open_orders->cancelAllOrder();
+$balances = $bot_only_for_balances_and_open_orders->getBalances($assets);
 
 $real_orders = [];
 
@@ -114,12 +116,13 @@ while (true) {
                     $amount = $spread_bot->incrementNumber($max_deal_amounts[$base_asset], $market['amount_increment']);
 
                     if (
-                        $create_order = $bot->createOrder(
+                        $create_order = $bot_create_only->createOrder(
                             $symbol,
                             'limit',
                             $side,
                             $amount,
-                            $price
+                            $price,
+                            'post_only'
                         )
                     ) {
                         $real_orders[$create_order['id']] = [
@@ -132,7 +135,7 @@ while (true) {
                         ];
                     }
 
-                    $balances = $bot->getBalances($assets);
+                    $balances = $bot_only_for_balances_and_open_orders->getBalances($assets);
 
                     Debug::printAll($debug_data, $balances, $real_orders, $exchange);
                     Debug::echo('[INFO] Create: ' . $symbol . ', ' . $side . ', ' . $amount . ', ' . $price);
@@ -148,12 +151,13 @@ while (true) {
                     $amount = $spread_bot->incrementNumber($max_deal_amounts[$base_asset], $market['amount_increment']);
 
                     if (
-                        $create_order = $bot->createOrder(
+                        $create_order = $bot_create_only->createOrder(
                             $symbol,
                             'limit',
                             $side,
                             $amount,
-                            $price
+                            $price,
+                            'post_only'
                         )
                     ) {
                         $real_orders[$create_order['id']] = [
@@ -166,7 +170,7 @@ while (true) {
                         ];
                     }
 
-                    $balances = $bot->getBalances($assets);
+                    $balances = $bot_only_for_balances_and_open_orders->getBalances($assets);
 
                     Debug::printAll($debug_data, $balances, $real_orders_for_symbol['sell'], $exchange);
                     Debug::echo('[INFO] Create: ' . $symbol . ', ' . $side . ', ' . $amount . ', ' . $price);
@@ -246,15 +250,16 @@ while (true) {
                         );
 
                         if ($amount >= $min_deal_amounts[$base_asset]) {
-                            $create_order = $bot->createOrder(
+                            $create_order = $bot_create_only->createOrder(
                                 $symbol,
                                 'limit',
                                 $side,
                                 $amount,
-                                $price
+                                $price,
+                                'ioc'
                             );
 
-                            $balances = $bot->getBalances($assets);
+                            $balances = $bot_only_for_balances_and_open_orders->getBalances($assets);
 
                             Debug::printAll($debug_data, $balances, [], $exchange);
                             Debug::echo('[INFO] Create Market: ' . $symbol . ', ' . $side . ', ' . $amount . ', ' . $price);
@@ -289,15 +294,16 @@ while (true) {
                         );
 
                         if ($amount >= $min_deal_amounts[$base_asset]) {
-                            $create_order = $bot->createOrder(
+                            $create_order = $bot_create_only->createOrder(
                                 $symbol,
                                 'limit',
                                 $side,
                                 $amount,
-                                $price
+                                $price,
+                                'ioc'
                             );
 
-                            $balances = $bot->getBalances($assets);
+                            $balances = $bot_only_for_balances_and_open_orders->getBalances($assets);
 
                             Debug::printAll($debug_data, $balances, [], $exchange);
                             Debug::echo('[INFO] Create Market: ' . $symbol . ', ' . $side . ', ' . $amount . ', ' . $price);
@@ -307,7 +313,7 @@ while (true) {
                 // SPREAD BOT MARKET
 
                 if ($need_get_balance)
-                    $balances = $bot->getBalances($assets);
+                    $balances = $bot_only_for_balances_and_open_orders->getBalances($assets);
             } elseif (TimeV2::up(1, 'empty_orderbooks' . $symbol)) {
                 if (empty($orderbooks[$symbol][$exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$exchange]');
                 if (empty($orderbooks[$symbol][$market_discovery_exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$market_discovery_exchange]');
@@ -316,10 +322,10 @@ while (true) {
     } elseif (TimeV2::up(1, 'no_rates')) Debug::echo('[WARNING] No rates');
 
     if (TimeV2::up(5, 'balance'))
-        $balances = $bot->getBalances($assets);
+        $balances = $bot_only_for_balances_and_open_orders->getBalances($assets);
 
     if (TimeV2::up(5, 'get_open_orders')) {
-        $or = $bot->getOpenOrders();
+        $or = $bot_only_for_balances_and_open_orders->getOpenOrders();
 
         $real_orders = [];
 
