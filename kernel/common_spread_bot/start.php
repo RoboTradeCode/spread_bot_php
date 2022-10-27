@@ -7,9 +7,10 @@ require dirname(__DIR__, 2) . '/index.php';
 
 $config = Configurator::getConfigFromFile('common_spread_bot');
 
+$exchange = $config['exchange'];
 $markets = $config['use_markets'];
 
 foreach ($markets as $market) {
-    Pm2::start(__DIR__ . '/spread_bot.php', 'SPREAD BOT ' . $market, 'algorithm', [$market]);
+    Pm2::start(__DIR__ . '/spread_bot.php', 'SPREAD BOT ' . $market . ' ' . $exchange, 'algorithm', [$market]);
     echo '[' . date('Y-m-d H:i:s') . '] Start: ' . $market . PHP_EOL;
 }
