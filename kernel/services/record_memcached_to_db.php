@@ -25,12 +25,14 @@ $use_markets = [
 
 $keys = [];
 
+$algorithm = 'spread-bot-php';
+
 foreach ($use_exchanges as $use_exchange) {
-    $keys[] = $use_exchange . '_config';
+    $keys[] = $use_exchange . '_' . $algorithm . '_config';
 
     foreach ($use_markets as $use_market) {
-        $keys[] = $use_exchange . '_' . $use_market . '_spreadBotLimitCalculations';
-        $keys[] = $use_exchange . '_' . $use_market . '_spreadBotMarketCalculations';
+        $keys[] = $use_exchange . '_' . $algorithm . '_' . $use_market . '_spreadBotLimitCalculations';
+        $keys[] = $use_exchange . '_' . $algorithm . '_' . $use_market . '_spreadBotMarketCalculations';
     }
 }
 
