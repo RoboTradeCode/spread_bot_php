@@ -45,6 +45,38 @@ class DB
         );
     }
 
+    public static function replaceMemcachedConfigToDB(string $algo, string $exchange, mixed $config): void
+    {
+        $sth = self::$connect->prepare(
+        /** @lang sql */
+            "REPLACE INTO `memcached_configs` (`id`, `algo`, `exchange`, `config`) VALUES (:id, :algo, :exchange, :config)"
+        );
+
+        $sth->execute([
+            'id' => $algo . '_' . $exchange,
+            'algo' => $algo,
+            'exchange' => $exchange,
+            'config' => is_array($config) ? json_encode($config) : $config,
+        ]);
+    }
+
+    public static function replaceMemcachedAlgoInnerCalculateToDB(string $algo, string $exchange, string $symbol, string $name, mixed $config): void
+    {
+        $sth = self::$connect->prepare(
+        /** @lang sql */
+            "REPLACE INTO `memcached_algo_inner_calculations` (`id`, `algo`, `exchange`, `symbol`, `name`, `config`) VALUES (:id, :algo, :exchange, :symbol, :name, :config)"
+        );
+
+        $sth->execute([
+            'id' => $algo . '_' . $exchange . '_' . $symbol . '_' . $name,
+            'algo' => $algo,
+            'exchange' => $exchange,
+            'symbol' => $symbol,
+            'name' => $name,
+            'config' => is_array($config) ? json_encode($config) : $config,
+        ]);
+    }
+
     private static function insert(string $table, array $columns_and_values): void
     {
         $columns = array_keys($columns_and_values);

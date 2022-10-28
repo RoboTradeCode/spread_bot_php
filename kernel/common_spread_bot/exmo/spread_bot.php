@@ -19,10 +19,10 @@ $symbol = $argv[1];
 
 $memcached = new Memcached();
 $memcached->addServer('localhost', 11211);
-$memcached->flush();
 
 $config = Configurator::getConfigFromFile('common_spread_bot');
 
+$algorithm = $config['algorithm'];
 $exchange = $config['exchange'];
 $market_discovery_exchange = $config['market_discovery_exchange'];
 $expired_orderbook_time = $config['expired_orderbook_time'];
@@ -43,6 +43,9 @@ $markets = $config['markets'][$exchange];
 $assets = explode('/', $symbol);
 $market = $markets[array_search($symbol, array_column($markets, 'common_symbol'))];
 list($base_asset, $quote_asset) = explode('/', $symbol);
+
+unset($config['keys']);
+$memcached->set($exchange . '_' . $algorithm . '_config', $config);
 
 Debug::switchOn($debug);
 
@@ -92,19 +95,20 @@ while (true) {
 
                 $debug_data = [
                     'symbol' => $symbol,
-                    'exchange_bid' => $exchange_orderbook['bid'],
-                    'exchange_ask' => $exchange_orderbook['ask'],
                     'market_discovery_bid' => $market_discovery['bid'],
                     'market_discovery_ask' => $market_discovery['ask'],
-                    'profit_bid' => $profit['bid'],
-                    'profit_ask' => $profit['ask'],
+                    'exchange_bid' => $exchange_orderbook['bid'],
+                    'exchange_ask' => $exchange_orderbook['ask'],
+                    'profit_bid' => $profit['bid'] * (1 - $order_profits['bid']['start'] / 100),
+                    'profit_ask' => $profit['ask'] * (1 + $order_profits['ask']['start'] / 100),
                     'min_profit_bid' => $min_profit['bid'],
                     'min_profit_ask' => $min_profit['ask'],
                     'real_orders_for_symbol_sell' => count($real_orders_for_symbol['sell']),
                     'real_orders_for_symbol_buy' => count($real_orders_for_symbol['buy']),
-                    'must_order_sell' => $max_orders['sell'],
-                    'must_order_buy' => $max_orders['buy']
+                    'real_orders' => $real_orders
                 ];
+
+                $memcached->set($exchange . '_' . $algorithm . '_' . $symbol . '_spreadBotLimitCalculations', $debug_data);
 
                 $price = $spread_bot->incrementNumber($profit['bid'] * (1 - $order_profits['bid']['start'] / 100), $market['price_increment']);
 
@@ -213,15 +217,15 @@ while (true) {
                     'symbol' => $symbol,
                     'market_discovery_bid' => $market_discovery['bid'],
                     'market_discovery_ask' => $market_discovery['ask'],
-                    'min_profit_bid' => $min_profit['bid'],
-                    'min_profit_ask' => $min_profit['ask'],
-                    'profit_bid' => $profit['bid'],
-                    'profit_ask' => $profit['ask'],
                     'exchange_bid' => $exchange_orderbook['bid'],
                     'exchange_ask' => $exchange_orderbook['ask'],
+                    'min_profit_bid' => $min_profit['bid'],
+                    'min_profit_ask' => $min_profit['ask'],
                     'profit_bid_with_fee' => $profit['bid'] * (1 + $fees[$exchange] / 100),
                     'profit_ask_with_fee' => $profit['ask'] * (1 - $fees[$exchange] / 100)
                 ];
+
+                $memcached->set($exchange . '_' . $algorithm . '_' . $symbol . '_spreadBotMarketCalculations', $debug_data);
 
                 $profit_bid_with_fee = $profit['bid'] * (1 + $fees[$exchange] / 100);
                 if ($exchange_orderbook['bid'] > $profit_bid_with_fee) {
