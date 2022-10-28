@@ -109,6 +109,7 @@ while (true) {
                 ];
 
                 $memcached->set($exchange . '_' . $algorithm . '_' . $symbol . '_spreadBotLimitCalculations', $debug_data);
+                unset($debug_data['real_orders']);
 
                 $price = $spread_bot->incrementNumber($profit['bid'] * (1 - $order_profits['bid']['start'] / 100), $market['price_increment']);
 
