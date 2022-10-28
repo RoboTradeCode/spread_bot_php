@@ -42,17 +42,17 @@ while (true) {
     if ($data = $memcached->getMulti($keys)) {
         foreach ($data as $key => $datum) {
             if (str_contains($key, '_config')) {
-                list($exchange, $algo) = explode('/', $key);
+                list($exchange, $algo) = explode('_', $key);
 
                 DB::replaceMemcachedConfigToDB($algo, $exchange, $datum);
             } elseif(str_contains($key, '_spreadBotLimitCalculations')) {
-                list($exchange, $algo, $symbol) = explode('/', $key);
+                list($exchange, $algo, $symbol) = explode('_', $key);
 
                 foreach ($datum as $k => $item) {
                     DB::replaceMemcachedAlgoInnerCalculateToDB($algo .'_limit', $exchange, $symbol, $k, $item);
                 }
             } elseif(str_contains($key, '_spreadBotMarketCalculations')) {
-                list($exchange, $algo, $symbol) = explode('/', $key);
+                list($exchange, $algo, $symbol) = explode('_', $key);
 
                 foreach ($datum as $k => $item) {
                     DB::replaceMemcachedAlgoInnerCalculateToDB($algo .'_market', $exchange, $symbol, $k, $item);
