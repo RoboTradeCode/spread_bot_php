@@ -43,7 +43,7 @@ class SpreadBot
 
     public function getProfit(array $market_discovery, array $min_profit): array
     {
-        $market_discovery_spread = $market_discovery['ask']  - $market_discovery['bid'];
+        $market_discovery_spread = $market_discovery['ask'] - $market_discovery['bid'];
 
         return [
             'bid' => $market_discovery['bid'] - ($market_discovery['bid'] * $min_profit['bid'] * $market_discovery_spread / 100),
