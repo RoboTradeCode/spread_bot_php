@@ -204,6 +204,9 @@ while (true) {
                         Debug::printAll($debug_data, $balances, $real_orders_for_symbol['buy'], $exchange);
                         Debug::echo('[INFO] Cancel: ' . $real_orders_for_symbol_buy['id'] . ', ' . $real_orders_for_symbol_buy['symbol'] . ', ' . $real_orders_for_symbol_buy['side'] . ', ' . $real_orders_for_symbol_buy['amount'] . ', ' . $real_orders_for_symbol_buy['price']);
                     }
+
+                if ($need_get_balance)
+                    $balances = $bot->getBalances($assets);
                 // SPREAD BOT LIMIT
 
 
@@ -310,9 +313,6 @@ while (true) {
                     }
                 }
                 // SPREAD BOT MARKET
-
-                if ($need_get_balance)
-                    $balances = $bot->getBalances($assets);
             } elseif (TimeV2::up(1, 'empty_orderbooks' . $symbol)) {
                 if (empty($orderbooks[$symbol][$exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$exchange]');
                 if (empty($orderbooks[$symbol][$market_discovery_exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$market_discovery_exchange]');

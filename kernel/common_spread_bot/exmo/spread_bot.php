@@ -97,6 +97,7 @@ while (true) {
                     'symbol' => $symbol,
                     'market_discovery_bid' => $market_discovery['bid'],
                     'market_discovery_ask' => $market_discovery['ask'],
+                    'market_discovery_spread' => $market_discovery['ask'],
                     'exchange_bid' => $exchange_orderbook['bid'],
                     'exchange_ask' => $exchange_orderbook['ask'],
                     'profit_bid' => $profit['bid'] * (1 - $order_profits['bid']['start'] / 100),
@@ -208,6 +209,9 @@ while (true) {
                         Debug::printAll($debug_data, $balances, $real_orders_for_symbol['buy'], $exchange);
                         Debug::echo('[INFO] Cancel: ' . $real_orders_for_symbol_buy['id'] . ', ' . $real_orders_for_symbol_buy['symbol'] . ', ' . $real_orders_for_symbol_buy['side'] . ', ' . $real_orders_for_symbol_buy['amount'] . ', ' . $real_orders_for_symbol_buy['price']);
                     }
+
+                if ($need_get_balance)
+                    $balances = $bot_only_for_balances_and_open_orders->getBalances($assets);
                 // SPREAD BOT LIMIT
 
 
@@ -316,9 +320,6 @@ while (true) {
                     }
                 }
                 // SPREAD BOT MARKET
-
-                if ($need_get_balance)
-                    $balances = $bot_only_for_balances_and_open_orders->getBalances($assets);
             } elseif (TimeV2::up(1, 'empty_orderbooks' . $symbol)) {
                 if (empty($orderbooks[$symbol][$exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$exchange]');
                 if (empty($orderbooks[$symbol][$market_discovery_exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$market_discovery_exchange]');
