@@ -26,14 +26,10 @@ class Ccxt
 
     public function getMyTrades(int $period = 86400000, array $symbols = ['BTC/USDT'], int $limit = 50): array
     {
-        $since = $this->exchange->milliseconds() - $period;
-
-        if ($this->exchange->has["fetchOpenOrders"] !== false) {
-            try {
-                return $this->exchange->fetchMyTrades($symbols, $since, $limit);
-            } catch (Throwable $e) {
-                echo "[INFO] getMyTrade does not work. Error: " . $e->getMessage() . PHP_EOL;
-            }
+        try {
+            return $this->exchange->fetch_my_trades($symbols, $this->exchange->milliseconds() - $period, $limit);
+        } catch (Throwable $e) {
+            echo "[INFO] getMyTrade does not work. Error: " . $e->getMessage() . PHP_EOL;
         }
 
         return [];
@@ -68,7 +64,7 @@ class Ccxt
         return $balances ?? [];
     }
 
-    public function createOrder(string $symbol, string $type, string $side, float $amount, float $price): array
+    public function createOrder(string $symbol, string $type, string $side, float $amount, float $price = null): array
     {
         try {
             $order = $this->exchange->create_order($symbol, $type, $side, $amount, $price);
