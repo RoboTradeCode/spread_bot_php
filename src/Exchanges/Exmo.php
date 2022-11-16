@@ -19,7 +19,7 @@ class Exmo extends Ccxt
         parent::__construct('exmo', $api_public, $api_secret, $api_password, $api_uid, $enableRateLimit);
     }
 
-    public function createOrder(string $symbol, string $type, string $side, float $amount, float $price = 0, string $exec_type = null): array
+    public function createOrder(string $symbol, string $type, string $side, float $amount, float|null $price = 0, string $exec_type = null): array
     {
         $mt = explode(' ', microtime());
 
