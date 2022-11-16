@@ -25,7 +25,7 @@ $min_deal_amount = $config['min_deal_amount'];
 $markets_discovery_exchange = $config['markets'][$market_discovery_exchange];
 
 $bot = new Ccxt($exchange, $key['api_key'], $key['secret_key']);
-$bot_market_discovery = new Ccxt($exchange, $keys_market_discovery['api_key'], $keys_market_discovery['secret_key']);
+$bot_market_discovery = new Ccxt($market_discovery_exchange, $keys_market_discovery['api_key'], $keys_market_discovery['secret_key']);
 
 $balances_market_discovery = $bot_market_discovery->getBalances($assets);
 
@@ -100,7 +100,7 @@ while (true) {
         }
         Debug::echo('[INFO] Can fetch my trades.');
     } else {
-        Debug::echo('[WARNING] Can not fetch my trades!!!');
+        Debug::echo('[INFO] No trades for last minute!!!');
     }
 }
 
