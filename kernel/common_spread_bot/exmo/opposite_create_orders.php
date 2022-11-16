@@ -32,71 +32,72 @@ $balances_market_discovery = $bot_market_discovery->getBalances($assets);
 $multi_core = new MemcachedData($exchange, $market_discovery_exchange, $use_markets, $expired_orderbook_time);
 
 while (true) {
-    usleep(5000);
-    $trades = array_reverse($bot->getMyTrades(60 * 1000, $use_markets, 10));
+    usleep(0);
 
-    $all_data = $multi_core->reformatAndSeparateData($memcached->getMulti($multi_core->keys));
-    $rates = $all_data['rates'];
+    if ($trades = array_reverse($bot->getMyTrades(60 * 1000, $use_markets, 10))) {
+        $all_data = $multi_core->reformatAndSeparateData($memcached->getMulti($multi_core->keys));
+        $rates = $all_data['rates'];
 
-    $my_rates = [];
-    foreach ($assets as $asset) {
-        $my_rates[$asset] = $rates[$asset]['USD'];
-    }
-
-    $min_deal_amounts = Filter::getDealAmountByRate($my_rates, $min_deal_amount);
-
-    $filter_trades = [];
-    foreach ($trades as $trade) {
-        if (empty($last_id)) {
-            $last_id = $trade['id'];
-            break;
+        $my_rates = [];
+        foreach ($assets as $asset) {
+            $my_rates[$asset] = $rates[$asset]['USD'];
         }
 
-        if ($trade['id'] == $last_id)
-            break;
+        $min_deal_amounts = Filter::getDealAmountByRate($my_rates, $min_deal_amount);
 
-        $filter_trades[] = $trade;
-    }
-
-    if (!empty($filter_trades)) {
-        foreach (array_reverse($filter_trades) as $filter_trade) {
-            $symbol = $filter_trade['symbol'];
-
-            list($base_asset, $quote_asset) = explode('/', $symbol);
-
-            $sell_or_buy = ($filter_trade['side'] == 'sell') ? 'buy' : 'sell';
-
-            $can_trade = false;
-
-            if ($sell_or_buy == 'sell') {
-                $can_trade = $balances_market_discovery[$base_asset]['free'] * 0.99 > $min_deal_amounts[$base_asset] && $balances_market_discovery[$base_asset]['free'] * 0.99 > $filter_trade['amount'];
-            } else {
-                $can_trade = $balances_market_discovery[$quote_asset]['free'] * 0.99 > $min_deal_amounts[$quote_asset] && $balances_market_discovery[$quote_asset]['free'] * 0.99 > $filter_trade['cost'];
+        $filter_trades = [];
+        foreach ($trades as $trade) {
+            if (empty($last_id)) {
+                $last_id = $trade['id'];
+                break;
             }
 
-            if ($can_trade) {
-                $markets_discovery_exchange = $markets_discovery_exchange[array_search($symbol, array_column($markets_discovery_exchange, 'common_symbol'))];
+            if ($trade['id'] == $last_id)
+                break;
 
-                if (
-                    $order_market_discovery = $bot_market_discovery->createOrder(
-                        $symbol,
-                        'market',
-                        $sell_or_buy,
-                        incrementNumber($filter_trade['amount'], $markets_discovery_exchange['amount_increment'])
-                    )
-                ) {
-                    $last_id = $filter_trade['id'];
-                    Debug::echo('[INFO] MARKET DISCOVERY Create market order: ' . $symbol . ', ' . $order_market_discovery['side'] . ', ' . $order_market_discovery['side'] . ', ' . $order_market_discovery['price']);
+            $filter_trades[] = $trade;
+        }
+
+        if (!empty($filter_trades)) {
+            foreach (array_reverse($filter_trades) as $filter_trade) {
+                $symbol = $filter_trade['symbol'];
+
+                list($base_asset, $quote_asset) = explode('/', $symbol);
+
+                $sell_or_buy = ($filter_trade['side'] == 'sell') ? 'buy' : 'sell';
+
+                $can_trade = false;
+
+                if ($sell_or_buy == 'sell') {
+                    $can_trade = $balances_market_discovery[$base_asset]['free'] * 0.99 > $min_deal_amounts[$base_asset] && $balances_market_discovery[$base_asset]['free'] * 0.99 > $filter_trade['amount'];
                 } else {
-                    Debug::echo('[WARNING] Can not create order!!! ' . json_encode($order_market_discovery));
-                    break;
+                    $can_trade = $balances_market_discovery[$quote_asset]['free'] * 0.99 > $min_deal_amounts[$quote_asset] && $balances_market_discovery[$quote_asset]['free'] * 0.99 > $filter_trade['cost'];
                 }
-            } else {
-                $last_id = $filter_trade['id'];
-            }
-        }
 
-        $balances_market_discovery = $bot_market_discovery->getBalances($assets);
+                if ($can_trade) {
+                    $markets_discovery_exchange = $markets_discovery_exchange[array_search($symbol, array_column($markets_discovery_exchange, 'common_symbol'))];
+
+                    if (
+                        $order_market_discovery = $bot_market_discovery->createOrder(
+                            $symbol,
+                            'market',
+                            $sell_or_buy,
+                            incrementNumber($filter_trade['amount'], $markets_discovery_exchange['amount_increment'])
+                        )
+                    ) {
+                        $last_id = $filter_trade['id'];
+                        Debug::echo('[INFO] MARKET DISCOVERY Create market order: ' . $symbol . ', ' . $order_market_discovery['side'] . ', ' . $order_market_discovery['side'] . ', ' . $order_market_discovery['price']);
+                    } else {
+                        Debug::echo('[WARNING] Can not create order!!! ' . json_encode($order_market_discovery));
+                        break;
+                    }
+                } else {
+                    $last_id = $filter_trade['id'];
+                }
+            }
+
+            $balances_market_discovery = $bot_market_discovery->getBalances($assets);
+        }
     }
 }
 
