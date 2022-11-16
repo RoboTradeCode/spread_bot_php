@@ -34,7 +34,7 @@ $multi_core = new MemcachedData($exchange, $market_discovery_exchange, $use_mark
 while (true) {
     usleep(0);
 
-    if ($trades = array_reverse($bot->getMyTrades(60 * 1000, $use_markets, 10))) {
+    if ($trades = array_reverse($bot->getMyTrades(60 * 1000, $use_markets, 100))) {
         $all_data = $multi_core->reformatAndSeparateData($memcached->getMulti($multi_core->keys));
         $rates = $all_data['rates'];
 
@@ -75,14 +75,16 @@ while (true) {
                 }
 
                 if ($can_trade) {
-                    $markets_discovery_exchange = $markets_discovery_exchange[array_search($symbol, array_column($markets_discovery_exchange, 'common_symbol'))];
+                    Debug::echo('[INFO] BEFORE MUST CREATE: ' . $symbol);
+
+                    $market_discovery_exchange_info = $markets_discovery_exchange[array_search($symbol, array_column($markets_discovery_exchange, 'common_symbol'))];
 
                     if (
                         $order_market_discovery = $bot_market_discovery->createOrder(
                             $symbol,
                             'market',
                             $sell_or_buy,
-                            incrementNumber($filter_trade['amount'], $markets_discovery_exchange['amount_increment'])
+                            incrementNumber($filter_trade['amount'], $market_discovery_exchange_info['amount_increment'])
                         )
                     ) {
                         $last_id = $filter_trade['id'];
