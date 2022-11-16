@@ -327,50 +327,6 @@ while (true) {
                     }
                 }
                 // SPREAD BOT MARKET
-
-                // TRADE ON MARKET DISCOVERY
-                if (TimeV2::up(1, 'trade_on_market_discovery', true)) {
-                    $trades = array_reverse($bot->getMyTrades(symbols: [$symbol], limit: 10));
-
-                    $filter_trades = [];
-                    foreach ($trades as $trade) {
-                        if (empty($last_id)) {
-                            $last_id = $trade['id'];
-                            break;
-                        }
-
-                        if ($trade['id'] == $last_id)
-                            break;
-
-                        $filter_trades[] = $trade;
-                    }
-
-                    if (!empty($filter_trades)) {
-                        foreach (array_reverse($filter_trades) as $filter_trade) {
-                            if ($balances_market_discovery[$base_asset]['free'] * 0.99 > $min_deal_amounts[$base_asset] && $balances_market_discovery[$base_asset]['free'] * 0.99 > $filter_trade['amount']) {
-                                if (
-                                    $order_market_discovery = $bot_market_discovery->createOrder(
-                                        $symbol,
-                                        'market',
-                                        ($filter_trade['side'] == 'sell') ? 'buy' : 'sell',
-                                        $spread_bot->incrementNumber($filter_trade['amount'], $markets_discovery_exchange['amount_increment'])
-                                    )
-                                ) {
-                                    $last_id = $filter_trade['id'];
-                                    Debug::echo('[INFO] MARKET DISCOVERY Create market order: ' . $symbol . ', ' . $order_market_discovery['side'] . ', ' . $order_market_discovery['amount']);
-                                } else {
-                                    Debug::echo('[WARNING] Can not create order!!! ' . json_encode($order_market_discovery));
-                                    break;
-                                }
-                            } else {
-                                $last_id = $filter_trade['id'];
-                            }
-                        }
-
-                        $balances_market_discovery = $bot_market_discovery->getBalances($assets);
-                    }
-                }
-                // TRADE ON MARKET DISCOVERY
             } elseif (TimeV2::up(1, 'empty_orderbooks' . $symbol)) {
                 if (empty($orderbooks[$symbol][$exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$exchange]');
                 if (empty($orderbooks[$symbol][$market_discovery_exchange])) Debug::echo('[WARNING] Empty $orderbooks[$symbol][$market_discovery_exchange]');
