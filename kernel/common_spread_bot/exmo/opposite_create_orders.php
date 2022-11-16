@@ -86,7 +86,7 @@ while (true) {
                     )
                 ) {
                     $last_id = $filter_trade['id'];
-                    Debug::echo('[INFO] MARKET DISCOVERY Create market order: ' . $symbol . ', ' . $order_market_discovery['side'] . ', ' . $order_market_discovery['amount']);
+                    Debug::echo('[INFO] MARKET DISCOVERY Create market order: ' . $symbol . ', ' . $order_market_discovery['side'] . ', ' . $order_market_discovery['side'] . ', ' . $order_market_discovery['price']);
                 } else {
                     Debug::echo('[WARNING] Can not create order!!! ' . json_encode($order_market_discovery));
                     break;
