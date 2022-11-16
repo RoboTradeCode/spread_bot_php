@@ -64,9 +64,6 @@ $bot_only_for_balances_and_open_orders = new Ccxt($exchange, $keys[2]['api_key']
 
 $balances = $bot_only_for_balances_and_open_orders->getBalances($assets);
 
-$bot_market_discovery = new Ccxt($exchange, $keys_market_discovery['api_key'], $keys_market_discovery['secret_key']);
-$balances_market_discovery = $bot_market_discovery->getBalances($assets);
-
 $real_orders = [];
 
 while (true) {
