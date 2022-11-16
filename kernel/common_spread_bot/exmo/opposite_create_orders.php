@@ -98,6 +98,9 @@ while (true) {
 
             $balances_market_discovery = $bot_market_discovery->getBalances($assets);
         }
+        Debug::echo('[INFO] Can fetch my trades.');
+    } else {
+        Debug::echo('[WARNING] Can not fetch my trades!!!');
     }
 }
 
