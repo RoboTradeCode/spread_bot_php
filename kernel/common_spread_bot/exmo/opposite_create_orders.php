@@ -69,9 +69,9 @@ while (true) {
                 $can_trade = false;
 
                 if ($sell_or_buy == 'sell') {
-                    $can_trade = $balances_market_discovery[$base_asset]['free'] * 0.99 > $min_deal_amounts[$base_asset] && $balances_market_discovery[$base_asset]['free'] * 0.99 > $filter_trade['amount'];
+                    $can_trade = ($balances_market_discovery[$base_asset]['free'] * 0.99 > $filter_trade['amount']) && ($filter_trade['amount'] > $min_deal_amounts[$base_asset]);
                 } else {
-                    $can_trade = $balances_market_discovery[$quote_asset]['free'] * 0.99 > $min_deal_amounts[$quote_asset] && $balances_market_discovery[$quote_asset]['free'] * 0.99 > $filter_trade['cost'];
+                    $can_trade = ($balances_market_discovery[$quote_asset]['free'] * 0.99 > $filter_trade['cost']) && ($filter_trade['cost'] > $min_deal_amounts[$quote_asset]);
                 }
 
                 if ($can_trade) {
@@ -90,8 +90,8 @@ while (true) {
                         $last_id = $filter_trade['id'];
                         Debug::echo('[INFO] MARKET DISCOVERY Create market order: ' . $symbol . ', ' . $order_market_discovery['side'] . ', ' . $order_market_discovery['side'] . ', ' . $order_market_discovery['price']);
                     } else {
-                        Debug::echo('[WARNING] Can not create order!!! ' . json_encode($order_market_discovery));
-                        break;
+                        Debug::echo('[WARNING] Can not create order!!! ' . $symbol . json_encode($order_market_discovery));
+                        usleep(500000);
                     }
                 } else {
                     $last_id = $filter_trade['id'];
