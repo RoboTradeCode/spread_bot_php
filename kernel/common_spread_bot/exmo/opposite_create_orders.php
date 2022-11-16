@@ -98,7 +98,7 @@ while (true) {
 
             $balances_market_discovery = $bot_market_discovery->getBalances($assets);
         }
-        Debug::echo('[INFO] Can fetch my trades.');
+        Debug::echo('[INFO] Have any trades: ' . count($trades));
     } else {
         Debug::echo('[INFO] No trades for last minute!!!');
     }
