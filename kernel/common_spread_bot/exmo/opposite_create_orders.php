@@ -8,8 +8,8 @@ use Src\SpreadBot\MemcachedData;
 
 require dirname(__DIR__, 3) . '/index.php';
 
-$memcached = new Memcached();
-$memcached->addServer('localhost', 11211);
+$redis = new Redis();
+$redis->connect('localhost', 6379);
 
 $config = Configurator::getConfigFromFile('common_spread_bot');
 
@@ -35,7 +35,19 @@ while (true) {
     usleep(0);
 
     if ($trades = array_reverse($bot->getMyTrades(60 * 1000, $use_markets, 100))) {
-        $all_data = $multi_core->reformatAndSeparateData($memcached->getMulti($multi_core->keys));
+
+	$data_from_shared_memory = $redis->mGet($multi_core->keys);
+	
+	$formated_data = [];
+	
+	foreach ($data_from_shared_memory as $key => $value) {
+		$formated_data[$multi_core->keys[$key]] = json_decode($value, true);
+	}
+	
+    $all_data = $multi_core->reformatAndSeparateData($formated_data);
+
+        // print_r($all_data); die();
+
         $rates = $all_data['rates'];
 
         $my_rates = [];

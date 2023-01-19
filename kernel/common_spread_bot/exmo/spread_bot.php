@@ -18,8 +18,8 @@ if (!isset($argv[1]))
 
 $symbol = $argv[1];
 
-$memcached = new Memcached();
-$memcached->addServer('localhost', 11211);
+$redis = new Redis();
+$redis->connect('localhost', 6379);
 
 $config = Configurator::getConfigFromFile('common_spread_bot');
 
@@ -49,11 +49,16 @@ $markets_discovery_exchange = $markets_discovery_exchange[array_search($symbol, 
 list($base_asset, $quote_asset) = explode('/', $symbol);
 
 unset($config['keys']);
-$memcached->set($exchange . '_' . $algorithm . '_config', $config);
+$redis->set($exchange . '_' . $algorithm . '_config', json_encode($config));
 
 Debug::switchOn($debug);
 
-$multi_core = new MemcachedData($exchange, $market_discovery_exchange, $markets, $expired_orderbook_time);
+$markets_for_symbol = array_filter($markets, fn($m) => $m['common_symbol'] == $symbol);
+
+$multi_core = new MemcachedData($exchange, $market_discovery_exchange, $markets_for_symbol, $expired_orderbook_time);
+
+// print_r($multi_core->keys); 
+// print_r($redis->mGet($multi_core->keys)); die();
 
 $spread_bot = new SpreadBot($exchange, $market_discovery_exchange);
 $spread_bot_market = new SpreadBotMarket($exchange, $market_discovery_exchange);
@@ -69,8 +74,18 @@ $real_orders = [];
 while (true) {
     usleep($sleep);
 
-    $all_data = $multi_core->reformatAndSeparateData($memcached->getMulti($multi_core->keys));
-
+	// $data_from_shared_memory = $memcached->getMulti($multi_core->keys);
+	$data_from_shared_memory = $redis->mGet($multi_core->keys);
+	
+	$formated_data = [];
+	foreach ($data_from_shared_memory as $key => $value) {
+		$formated_data[$multi_core->keys[$key]] = json_decode($value, true);
+	}
+	
+	// print_r($formated_data); die();
+	
+    $all_data = $multi_core->reformatAndSeparateData($formated_data);
+	
     [$orderbooks, $rates] = [$all_data['orderbooks'], $all_data['rates']];
 
     if (
@@ -112,7 +127,7 @@ while (true) {
                     'real_orders' => $real_orders
                 ];
 
-                $memcached->set($exchange . '_' . $algorithm . '_' . $symbol . '_spreadBotLimitCalculations', $debug_data);
+                $redis->set($exchange . '_' . $algorithm . '_' . $symbol . '_spreadBotLimitCalculations', json_encode($debug_data));
                 unset($debug_data['real_orders']);
 
                 $price = $spread_bot->incrementNumber($profit['bid'] * (1 - $order_profits['bid']['start'] / 100), $market['price_increment']);
@@ -233,7 +248,7 @@ while (true) {
                     'profit_ask_with_fee' => $profit['ask'] * (1 - $fees[$exchange] / 100)
                 ];
 
-                $memcached->set($exchange . '_' . $algorithm . '_' . $symbol . '_spreadBotMarketCalculations', $debug_data);
+                $redis->set($exchange . '_' . $algorithm . '_' . $symbol . '_spreadBotMarketCalculations', json_encode($debug_data));
 
                 $profit_bid_with_fee = $profit['bid'] * (1 + $fees[$exchange] / 100);
                 if ($exchange_orderbook['bid'] > $profit_bid_with_fee) {
